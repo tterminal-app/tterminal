@@ -14,7 +14,7 @@ import 'package:ffi/ffi.dart';
 import 'l10n.dart';
 import 'native_error.dart';
 
-const kExpectedAbiVersion = 13;
+const kExpectedAbiVersion = 14;
 
 /// 與 alacritty_terminal cell flags 對齊(bits 由 Rust 測試鎖定)。
 abstract final class CellFlags {
@@ -162,6 +162,14 @@ typedef SshExecD =
 // ---- vault(低頻 JSON 通道;協定見 core/tterm-ffi/src/vault_ffi.rs)----
 typedef VaultOpenC = ffi.Pointer<ffi.Void> Function(ffi.Pointer<Utf8>);
 typedef VaultOpenD = ffi.Pointer<ffi.Void> Function(ffi.Pointer<Utf8>);
+// (dir, service, account)
+typedef VaultOpenKeychainC =
+    ffi.Pointer<ffi.Void> Function(
+      ffi.Pointer<Utf8>,
+      ffi.Pointer<Utf8>,
+      ffi.Pointer<Utf8>,
+    );
+typedef VaultOpenKeychainD = VaultOpenKeychainC;
 typedef VaultJsonOutC =
     ffi.Size Function(ffi.Pointer<ffi.Void>, ffi.Pointer<ffi.Uint8>, ffi.Size);
 typedef VaultJsonOutD =
@@ -278,6 +286,10 @@ class TermFfi {
     );
 
     vaultOpen = _lib.lookupFunction<VaultOpenC, VaultOpenD>('tterm_vault_open');
+    vaultOpenKeychain = _lib
+        .lookupFunction<VaultOpenKeychainC, VaultOpenKeychainD>(
+          'tterm_vault_open_keychain',
+        );
     vaultFree = _lib.lookupFunction<FreeC, FreeD>('tterm_vault_free');
     vaultSnapshot = _lib.lookupFunction<VaultJsonOutC, VaultJsonOutD>(
       'tterm_vault_snapshot',
@@ -365,6 +377,7 @@ class TermFfi {
   late final LastErrorD lastError;
 
   late final VaultOpenD vaultOpen;
+  late final VaultOpenKeychainD vaultOpenKeychain;
   late final FreeD vaultFree;
   late final VaultJsonOutD vaultSnapshot;
   late final VaultStrJsonOutD vaultUpsert;

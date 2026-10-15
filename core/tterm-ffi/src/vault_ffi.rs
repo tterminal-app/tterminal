@@ -11,6 +11,8 @@
 //!   error 鍵;格式見 error.rs)。
 //! - vault key 永不跨越此邊界;token 只經 `tterm_vault_sync_transport`
 //!   提供給 Dart 做 HTTP Authorization(E2E key 與 token 分離,見設計文件)。
+//!   Keychain 模式也一樣:Rust 自己呼叫 Security.framework(keychain.rs),
+//!   Dart 只決定 service / account 名稱。
 
 use std::ffi::{c_char, c_void, CStr};
 
@@ -79,6 +81,46 @@ pub unsafe extern "C" fn tterm_vault_open(dir: *const c_char) -> *mut c_void {
             std::ptr::null_mut()
         }
     }
+}
+
+/// 開啟 vault,vault key 存在 Apple Keychain(iOS / macOS)的 generic password
+/// `service` / `account`。dir 裡舊版留下的 vault.key 會搬進 Keychain(確認寫入後才刪)。
+/// 其他平台或失敗回 null,錯誤經 tterm_last_error。
+///
+/// # Safety
+/// `dir`、`service`、`account` 必須是有效的 NUL 結尾 UTF-8。
+#[no_mangle]
+pub unsafe extern "C" fn tterm_vault_open_keychain(
+    dir: *const c_char,
+    service: *const c_char,
+    account: *const c_char,
+) -> *mut c_void {
+    let args = unsafe { (cstr(dir), cstr(service), cstr(account)) };
+    let (dir, service, account) = match args {
+        (Ok(d), Ok(s), Ok(a)) => (d, s, a),
+        (Err(e), _, _) | (_, Err(e), _) | (_, _, Err(e)) => {
+            set_error(e);
+            return std::ptr::null_mut();
+        }
+    };
+    match open_keychain(dir, service, account) {
+        Ok(v) => Box::into_raw(Box::new(v)) as *mut c_void,
+        Err(e) => {
+            set_error(format!("{e:#}"));
+            std::ptr::null_mut()
+        }
+    }
+}
+
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+fn open_keychain(dir: &str, service: &str, account: &str) -> anyhow::Result<VaultStore> {
+    let key_store = crate::keychain::KeychainKeyStore::new(service, account);
+    VaultStore::open_with_key_store(dir, Box::new(key_store))
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "ios")))]
+fn open_keychain(_dir: &str, _service: &str, _account: &str) -> anyhow::Result<VaultStore> {
+    anyhow::bail!("no Keychain on this platform; use tterm_vault_open")
 }
 
 #[no_mangle]

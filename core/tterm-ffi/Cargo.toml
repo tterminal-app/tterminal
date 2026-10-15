@@ -18,6 +18,10 @@ serde_json = "1"
 uuid = { version = "1", features = ["v4"] }
 anyhow = { workspace = true }
 
+# vault key 存 Keychain(Security.framework 自己宣告,只借 CF 型別與函式)
+[target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
+core-foundation-sys = "0.8"
+
 [dev-dependencies]
 tempfile = "3"
 base64 = "0.22"

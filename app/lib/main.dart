@@ -102,7 +102,10 @@ class _ShellRootState extends State<ShellRoot> {
       '$base${Platform.pathSeparator}prefs.json',
     );
     try {
-      _vault = VaultService.open('$base${Platform.pathSeparator}vault');
+      _vault = VaultService.open(
+        '$base${Platform.pathSeparator}vault',
+        keychain: vaultKeychain(),
+      );
       // 啟動時背景同步一次(未設定同步時是 no-op)
       unawaited(_vault!.syncNow());
     } catch (e) {

@@ -41,13 +41,30 @@ class SyncTransport {
   final String vaultId;
 }
 
+/// vault key 存在 Apple Keychain 的哪個項目(generic password)。
+/// 讀寫由 Rust 直接呼叫 Security.framework,key 本身不經過 Dart。
+class VaultKeychain {
+  const VaultKeychain({required this.service, required this.account});
+
+  final String service;
+  final String account;
+}
+
 class NativeVault {
-  NativeVault.open(String dir) : _ffi = TermFfi() {
+  /// [keychain] 為 null:vault key 存在 [dir]/vault.key(Windows/Linux、測試)。
+  /// 給了就存 Keychain,[dir] 裡舊版留下的 vault.key 會搬進去。
+  NativeVault.open(String dir, {VaultKeychain? keychain}) : _ffi = TermFfi() {
     final dirC = dir.toNativeUtf8();
+    final serviceC = keychain?.service.toNativeUtf8();
+    final accountC = keychain?.account.toNativeUtf8();
     try {
-      _handle = _ffi.vaultOpen(dirC);
+      _handle = serviceC == null || accountC == null
+          ? _ffi.vaultOpen(dirC)
+          : _ffi.vaultOpenKeychain(dirC, serviceC, accountC);
     } finally {
       calloc.free(dirC);
+      if (serviceC != null) calloc.free(serviceC);
+      if (accountC != null) calloc.free(accountC);
     }
     if (_handle.address == 0) {
       // 不另加「無法開啟 vault」前綴:顯示的地方都會再包一層「Vault 無法開啟:」

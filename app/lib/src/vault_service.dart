@@ -52,8 +52,8 @@ String defaultVaultDir() {
 }
 
 class VaultService extends ChangeNotifier {
-  VaultService.open(String dir, {SyncClient? client})
-      : _vault = NativeVault.open(dir),
+  VaultService.open(String dir, {SyncClient? client, VaultKeychain? keychain})
+      : _vault = NativeVault.open(dir, keychain: keychain),
         _client = client ?? SyncClient() {
     _refresh();
   }

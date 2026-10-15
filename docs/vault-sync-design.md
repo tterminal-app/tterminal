@@ -82,10 +82,24 @@ Record {
   `blob = nonce(24B) || seal(key, nonce, plaintext=json(body), aad=record_id)`。
   AAD 綁 record id,防止 server 把 A 記錄的密文搬到 B 記錄上。
 - **At rest(本地)**:整個 vault 狀態(records + 同步設定)序列化成 JSON 後整份加密
-  存 `vault.tv`;vault key 存旁邊的 `vault.key`。
-  - 誠實說明:本階段 key 與資料同目錄,at-rest 保護有限(和 RustDesk 的本地設定同級)。
-    之後依 PLAN §5.2 移入 OS keychain(DPAPI / Keychain / Secret Service),
-    檔案格式不用變(`vault.key` 消失、key 改由 keychain 供應)。
+  存 `vault.tv`。vault key 由 `KeyStore`(tterm-vault `keystore.rs`)保管,`vault.tv`
+  格式不變:
+  - **iOS / macOS**:系統 Keychain 的 generic password
+    (service `dev.tterm.tterminal.vault`、account `vault-key`)。Rust 直接呼叫
+    Security.framework(tterm-ffi `keychain.rs`),key 不經過 Dart / Swift。
+    - iOS accessibility = `kSecAttrAccessibleAfterFirstUnlock`:開機解鎖過一次後,
+      鎖屏中背景開 vault 也讀得到;不加 ThisDeviceOnly,加密備份(iCloud 備份一律加密)
+      還原到新手機時 key 跟著 `vault.tv` 一起回來。不同步到 iCloud 鑰匙圈。
+    - macOS 存登入鑰匙圈(app 沒有 team 簽章,用不了 data protection keychain)。
+  - **Windows / Linux**:暫時仍是旁邊的 `vault.key`(base64),之後接 DPAPI /
+    Secret Service 時實作一個 `KeyStore` 即可。
+  - **舊版升級**:開啟時把 `vault.key` 寫進 Keychain、讀回確認是同一把才刪檔;
+    寫不進去就照舊用檔案開,下次再搬。Keychain 讀取失敗(鎖定、拒絕存取)直接報錯,
+    絕不當成「沒有 key」。
+  - **換 key**(貼配對字串):Keychain 先放「新、舊」兩把 → 新 key 寫 `vault.tv`
+    (原子 rename)→ 只留新的。任何一步中斷,Keychain 都有一把解得開 `vault.tv`。
+  - **沒有任何 key 解得開**(例:未加密備份還原到另一台,Keychain 沒跟過來):
+    原檔改名 `vault.tv.unreadable-<ms>` 保留、開新 vault,使用者還能重新配對拿回同步資料。
 
 ## 3. 配對字串(RustDesk 式)
 

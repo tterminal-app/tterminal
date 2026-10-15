@@ -14,6 +14,8 @@ use tterm_session::Session;
 use tterm_term::Damage;
 
 mod error;
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+mod keychain;
 pub mod vault_ffi;
 
 use error::{error_json, message_json};
@@ -641,9 +643,10 @@ pub extern "C" fn tterm_session_demo_feed(
 /// v12:tterm_ssh_public_key(金鑰列表從私鑰算出公鑰,不連線)。
 /// v13:錯誤一律走 JSON(英文訊息 + 給 UI 翻譯的 code,見 error.rs);
 ///      tterm_vault_set_conflict_name_template(衝突副本名稱跟著 UI 語系)。
+/// v14:tterm_vault_open_keychain(vault key 改存 Apple Keychain)。
 #[no_mangle]
 pub extern "C" fn tterm_ffi_version() -> u32 {
-    13
+    14
 }
 
 /// 寫 UTF-8 字串到 caller buffer,必要時在字元邊界截斷(不產生半個字)。

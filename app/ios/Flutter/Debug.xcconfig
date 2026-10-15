@@ -1,9 +1,10 @@
 #include "Generated.xcconfig"
 
 // Rust 核心以 staticlib 連結(iOS 不能 dlopen 隨附 dylib);
-// -force_load 保住 Swift 端沒引用的 FFI 符號,dart:ffi 才查得到
-OTHER_LDFLAGS[sdk=iphoneos*] = $(inherited) -force_load $(PROJECT_DIR)/../../core/target/aarch64-apple-ios/release/libtterm_ffi.a
-OTHER_LDFLAGS[sdk=iphonesimulator*] = $(inherited) -force_load $(PROJECT_DIR)/../../core/target/aarch64-apple-ios-sim/release/libtterm_ffi.a
+// -force_load 保住 Swift 端沒引用的 FFI 符號,dart:ffi 才查得到。
+// Security:vault key 存 Keychain(Rust 直接呼叫 SecItem*,staticlib 不會自動帶 framework)
+OTHER_LDFLAGS[sdk=iphoneos*] = $(inherited) -force_load $(PROJECT_DIR)/../../core/target/aarch64-apple-ios/release/libtterm_ffi.a -framework Security
+OTHER_LDFLAGS[sdk=iphonesimulator*] = $(inherited) -force_load $(PROJECT_DIR)/../../core/target/aarch64-apple-ios-sim/release/libtterm_ffi.a -framework Security
 
 // Debug 不設 EXPORTED_SYMBOLS_FILE:debug dylib 殼(blank executor)要
 // dlsym 進入點,限縮 export 會讓 app 啟動即 abort;Debug 也不做 dead-strip,
