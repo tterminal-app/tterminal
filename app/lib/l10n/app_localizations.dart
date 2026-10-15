@@ -635,7 +635,7 @@ abstract class AppLocalizations {
   /// No description provided for @keysEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No keys yet. Hit “Add Key” and paste in a private key.'**
+  /// **'No keys yet. Hit “Generate Key” to make a new one, or “Add Key” to paste in a private key you already have.'**
   String get keysEmpty;
 
   /// No description provided for @addSshKey.
@@ -703,6 +703,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t delete: {error}'**
   String deleteFailed(String error);
+
+  /// No description provided for @generateKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Key'**
+  String get generateKey;
+
+  /// No description provided for @generateSshKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate SSH Key'**
+  String get generateSshKey;
+
+  /// No description provided for @keyType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get keyType;
+
+  /// No description provided for @keyTypeEd25519.
+  ///
+  /// In en, this message translates to:
+  /// **'Ed25519 (recommended)'**
+  String get keyTypeEd25519;
+
+  /// No description provided for @keyTypeRsa.
+  ///
+  /// In en, this message translates to:
+  /// **'RSA 4096 (for older servers)'**
+  String get keyTypeRsa;
+
+  /// No description provided for @passphraseRepeatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat passphrase'**
+  String get passphraseRepeatLabel;
+
+  /// No description provided for @keygenPassphraseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave empty for no passphrase. If you set one, the private key is encrypted with it; the passphrase is saved with the key in your vault and used automatically when connecting.'**
+  String get keygenPassphraseHint;
+
+  /// No description provided for @passphraseMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The two passphrases don\'t match'**
+  String get passphraseMismatch;
+
+  /// No description provided for @keygenNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is required'**
+  String get keygenNameRequired;
+
+  /// No description provided for @generate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get generate;
+
+  /// No description provided for @generatingKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating…'**
+  String get generatingKey;
+
+  /// No description provided for @keyGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Key generated'**
+  String get keyGenerated;
+
+  /// No description provided for @keyGeneratedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to Keys as “{name}”. Add this public key to ~/.ssh/authorized_keys on the server, then pick this key for the host to sign in with it.'**
+  String keyGeneratedBody(String name);
+
+  /// No description provided for @keygenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t generate the key: {error}'**
+  String keygenFailed(String error);
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @hostFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Host key fingerprint'**
+  String get hostFingerprint;
+
+  /// No description provided for @hostFingerprintNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not remembered yet. The server\'s host key fingerprint is saved on the first connection and checked every time after that.'**
+  String get hostFingerprintNone;
+
+  /// No description provided for @hostFingerprintClearHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only clear it if the server was reinstalled or its host key was replaced. After clearing, the next connection trusts whatever key the server presents and remembers it.'**
+  String get hostFingerprintClearHint;
+
+  /// No description provided for @hostFingerprintWillClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Will be cleared when you save. The next connection remembers the key the server presents.'**
+  String get hostFingerprintWillClear;
+
+  /// No description provided for @hostFingerprintAddressChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'The address or port changed, so the remembered fingerprint (it belongs to the old host) will be cleared when you save.'**
+  String get hostFingerprintAddressChanged;
+
+  /// No description provided for @hostKeyChangedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The host key has changed'**
+  String get hostKeyChangedTitle;
+
+  /// No description provided for @hostKeyChangedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{name}” presented a different host key from the one remembered on the first connection, so the connection was stopped.\n\nThe server may have been reinstalled, or its admin replaced the host key. But someone could also be intercepting this connection (a man-in-the-middle attack). Don\'t go on until you\'ve checked.'**
+  String hostKeyChangedBody(String name);
+
+  /// No description provided for @hostKeyRemembered.
+  ///
+  /// In en, this message translates to:
+  /// **'Remembered fingerprint'**
+  String get hostKeyRemembered;
+
+  /// No description provided for @hostKeyPresented.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint presented this time'**
+  String get hostKeyPresented;
+
+  /// No description provided for @hostKeyHowToVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'To check: ask the server\'s admin to run ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub on the server and compare the result with the fingerprint presented this time. They have to match exactly.'**
+  String get hostKeyHowToVerify;
+
+  /// No description provided for @hostKeyTrustNew.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve confirmed the host changed. Use the new fingerprint…'**
+  String get hostKeyTrustNew;
+
+  /// No description provided for @hostKeyNotInVault.
+  ///
+  /// In en, this message translates to:
+  /// **'This host is no longer in your Vaults, so its fingerprint can\'t be updated here.'**
+  String get hostKeyNotInVault;
+
+  /// No description provided for @hostKeyTrustTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the new host key?'**
+  String get hostKeyTrustTitle;
+
+  /// No description provided for @hostKeyTrustBody.
+  ///
+  /// In en, this message translates to:
+  /// **'From now on only this new key will be accepted for “{name}”, and the old fingerprint is forgotten. If someone is in fact intercepting the connection, they could read everything you send after this, passwords included.'**
+  String hostKeyTrustBody(String name);
+
+  /// No description provided for @hostKeyTrustCheckbox.
+  ///
+  /// In en, this message translates to:
+  /// **'I checked the new fingerprint through another channel, and it matches exactly'**
+  String get hostKeyTrustCheckbox;
+
+  /// No description provided for @hostKeyTrustConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Use new fingerprint and reconnect'**
+  String get hostKeyTrustConfirm;
 
   /// No description provided for @tabBarPosition.
   ///

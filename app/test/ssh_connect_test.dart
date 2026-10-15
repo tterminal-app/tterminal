@@ -131,7 +131,7 @@ void main() {
       expect(local.isSsh, isFalse);
     });
 
-    test('host key 不符 → 拒絕', () async {
+    test('host key 不符 → 拒絕,帶著新舊指紋給錯誤畫面', () async {
       await expectLater(
         NativeSession.connectSsh(
           config: {
@@ -145,11 +145,13 @@ void main() {
           rows: 24,
         ),
         throwsA(
-          isA<SshConnectException>().having(
-            (e) => e.message,
-            'message',
-            contains('host key'),
-          ),
+          isA<HostKeyMismatchException>()
+              .having(
+                (e) => e.expected,
+                'expected',
+                'SHA256:not-the-real-fingerprint',
+              )
+              .having((e) => e.actual, 'actual', startsWith('SHA256:')),
         ),
       );
     });

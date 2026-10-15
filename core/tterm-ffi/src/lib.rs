@@ -240,6 +240,68 @@ unsafe fn ssh_public_key_json(
     }))
 }
 
+/// [`tterm_ssh_generate_key`] 回傳 JSON 的上限;呼叫端一次給這麼大的 buffer。
+/// RSA 4096 加密私鑰 + 公鑰行也才約 5KB。
+pub const SSH_GENERATE_KEY_MAX: usize = 16 * 1024;
+
+/// 產生新的 SSH 金鑰對(Vaults → Keys「產生金鑰」;手機上沒有 ssh-keygen)。
+///
+/// `kind`:`"ed25519"` / `"rsa"`(RSA 4096)。`comment` 可為 null(= 空字串);
+/// `passphrase` 為 null 或空字串 = 私鑰不加密。
+///
+/// 回 JSON:`{"privateKey","publicKey","algorithm","fingerprint","comment"}`,
+/// 失敗為錯誤 JSON(見 error.rs)。
+///
+/// **不是冪等**:每次呼叫都是一把新金鑰,所以**不能**「buffer 不夠就加大重呼叫」
+/// (重呼叫拿到的是另一把)。回傳 JSON 保證不超過 [`SSH_GENERATE_KEY_MAX`],
+/// 呼叫端一次給足;回傳值 > `cap` 表示呼叫端違約,這次結果作廢。
+///
+/// # Safety
+/// `kind` 必須是有效的 NUL 結尾 UTF-8 字串,`comment` / `passphrase` 若非 null
+/// 亦同;`out` 必須可寫入至少 `cap` bytes。
+#[no_mangle]
+pub unsafe extern "C" fn tterm_ssh_generate_key(
+    kind: *const std::os::raw::c_char,
+    comment: *const std::os::raw::c_char,
+    passphrase: *const std::os::raw::c_char,
+    out: *mut u8,
+    cap: usize,
+) -> usize {
+    let json = match unsafe { ssh_generate_key_json(kind, comment, passphrase) } {
+        Ok(v) => v,
+        Err(e) => error_json(&e),
+    };
+    write_bytes_full(json.to_string().as_bytes(), out, cap)
+}
+
+unsafe fn ssh_generate_key_json(
+    kind: *const std::os::raw::c_char,
+    comment: *const std::os::raw::c_char,
+    passphrase: *const std::os::raw::c_char,
+) -> anyhow::Result<serde_json::Value> {
+    use anyhow::anyhow;
+    let opt_str = |p: *const std::os::raw::c_char| -> anyhow::Result<&str> {
+        if p.is_null() {
+            return Ok("");
+        }
+        unsafe { std::ffi::CStr::from_ptr(p) }
+            .to_str()
+            .map_err(|e| anyhow!("argument is not valid UTF-8: {e}"))
+    };
+    let kind_name = opt_str(kind)?;
+    let kind = tterm_ssh::KeyKind::from_name(kind_name)
+        .ok_or_else(|| anyhow!("unsupported key type: {kind_name:?}"))?;
+    let pass = opt_str(passphrase)?;
+    let key = tterm_ssh::generate_key(kind, opt_str(comment)?, Some(pass))?;
+    Ok(serde_json::json!({
+        "privateKey": key.private_key,
+        "publicKey": key.public.openssh,
+        "algorithm": key.public.algorithm,
+        "fingerprint": key.public.fingerprint,
+        "comment": key.public.comment,
+    }))
+}
+
 /// OSC 52 剪貼簿內容(tmux/vim 反白複製時經 escape sequence 回報)。
 /// 回傳 bytes 數並**取走**;0 = 沒有新內容;> `cap` = buffer 不夠
 /// (內容未取走,擴大重呼叫)。
@@ -644,9 +706,10 @@ pub extern "C" fn tterm_session_demo_feed(
 /// v13:錯誤一律走 JSON(英文訊息 + 給 UI 翻譯的 code,見 error.rs);
 ///      tterm_vault_set_conflict_name_template(衝突副本名稱跟著 UI 語系)。
 /// v14:tterm_vault_open_keychain(vault key 改存 Apple Keychain)。
+/// v15:tterm_ssh_generate_key(在 app 內產生金鑰對)。
 #[no_mangle]
 pub extern "C" fn tterm_ffi_version() -> u32 {
-    14
+    15
 }
 
 /// 寫 UTF-8 字串到 caller buffer,必要時在字元邊界截斷(不產生半個字)。

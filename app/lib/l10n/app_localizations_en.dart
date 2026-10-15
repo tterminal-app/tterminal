@@ -361,7 +361,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keysEmpty =>
-      'No keys yet. Hit “Add Key” and paste in a private key.';
+      'No keys yet. Hit “Generate Key” to make a new one, or “Add Key” to paste in a private key you already have.';
 
   @override
   String get addSshKey => 'Add SSH Key';
@@ -402,6 +402,119 @@ class AppLocalizationsEn extends AppLocalizations {
   String deleteFailed(String error) {
     return 'Couldn\'t delete: $error';
   }
+
+  @override
+  String get generateKey => 'Generate Key';
+
+  @override
+  String get generateSshKey => 'Generate SSH Key';
+
+  @override
+  String get keyType => 'Type';
+
+  @override
+  String get keyTypeEd25519 => 'Ed25519 (recommended)';
+
+  @override
+  String get keyTypeRsa => 'RSA 4096 (for older servers)';
+
+  @override
+  String get passphraseRepeatLabel => 'Repeat passphrase';
+
+  @override
+  String get keygenPassphraseHint =>
+      'Leave empty for no passphrase. If you set one, the private key is encrypted with it; the passphrase is saved with the key in your vault and used automatically when connecting.';
+
+  @override
+  String get passphraseMismatch => 'The two passphrases don\'t match';
+
+  @override
+  String get keygenNameRequired => 'Name is required';
+
+  @override
+  String get generate => 'Generate';
+
+  @override
+  String get generatingKey => 'Generating…';
+
+  @override
+  String get keyGenerated => 'Key generated';
+
+  @override
+  String keyGeneratedBody(String name) {
+    return 'Saved to Keys as “$name”. Add this public key to ~/.ssh/authorized_keys on the server, then pick this key for the host to sign in with it.';
+  }
+
+  @override
+  String keygenFailed(String error) {
+    return 'Couldn\'t generate the key: $error';
+  }
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get hostFingerprint => 'Host key fingerprint';
+
+  @override
+  String get hostFingerprintNone =>
+      'Not remembered yet. The server\'s host key fingerprint is saved on the first connection and checked every time after that.';
+
+  @override
+  String get hostFingerprintClearHint =>
+      'Only clear it if the server was reinstalled or its host key was replaced. After clearing, the next connection trusts whatever key the server presents and remembers it.';
+
+  @override
+  String get hostFingerprintWillClear =>
+      'Will be cleared when you save. The next connection remembers the key the server presents.';
+
+  @override
+  String get hostFingerprintAddressChanged =>
+      'The address or port changed, so the remembered fingerprint (it belongs to the old host) will be cleared when you save.';
+
+  @override
+  String get hostKeyChangedTitle => 'The host key has changed';
+
+  @override
+  String hostKeyChangedBody(String name) {
+    return '“$name” presented a different host key from the one remembered on the first connection, so the connection was stopped.\n\nThe server may have been reinstalled, or its admin replaced the host key. But someone could also be intercepting this connection (a man-in-the-middle attack). Don\'t go on until you\'ve checked.';
+  }
+
+  @override
+  String get hostKeyRemembered => 'Remembered fingerprint';
+
+  @override
+  String get hostKeyPresented => 'Fingerprint presented this time';
+
+  @override
+  String get hostKeyHowToVerify =>
+      'To check: ask the server\'s admin to run ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub on the server and compare the result with the fingerprint presented this time. They have to match exactly.';
+
+  @override
+  String get hostKeyTrustNew =>
+      'I\'ve confirmed the host changed. Use the new fingerprint…';
+
+  @override
+  String get hostKeyNotInVault =>
+      'This host is no longer in your Vaults, so its fingerprint can\'t be updated here.';
+
+  @override
+  String get hostKeyTrustTitle => 'Use the new host key?';
+
+  @override
+  String hostKeyTrustBody(String name) {
+    return 'From now on only this new key will be accepted for “$name”, and the old fingerprint is forgotten. If someone is in fact intercepting the connection, they could read everything you send after this, passwords included.';
+  }
+
+  @override
+  String get hostKeyTrustCheckbox =>
+      'I checked the new fingerprint through another channel, and it matches exactly';
+
+  @override
+  String get hostKeyTrustConfirm => 'Use new fingerprint and reconnect';
 
   @override
   String get tabBarPosition => 'Tab bar position';

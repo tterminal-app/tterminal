@@ -15,6 +15,7 @@ import 'file_drag.dart';
 import 'file_drop.dart';
 import 'file_editor.dart';
 import 'file_pane.dart';
+import 'host_key_mismatch_view.dart';
 import 'input_watchdog.dart';
 import 'keys.dart';
 import 'l10n.dart';
@@ -940,6 +941,18 @@ class _AppShellState extends State<AppShell> {
             ),
           ],
         ),
+      );
+    }
+    if (tab.session == null && tab.hostKeyMismatch != null) {
+      return HostKeyMismatchView(
+        key: ValueKey('tab-hostkey-mismatch-${tab.id}'),
+        tab: tab,
+        tabs: widget.tabs,
+        vault: widget.vault,
+        onReconnect: () {
+          widget.tabs.reconnect(tab.id);
+          _focusActive();
+        },
       );
     }
     if (tab.session == null) {

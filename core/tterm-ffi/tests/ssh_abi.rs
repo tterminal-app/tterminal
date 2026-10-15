@@ -306,6 +306,31 @@ fn connect_ssh_host_key_mismatch_rejected() {
     assert!(err["error"].as_str().unwrap().contains("host key"), "{err}");
 }
 
+/// 錯誤畫面「改用新指紋」存的是 args.actual:它必須是伺服器真正出示的那把
+/// (= ssh-keygen -lf 看到的),改用之後就連得上。
+#[test]
+fn host_key_mismatch_actual_is_pinnable() {
+    let port = start_server();
+    let connect = |known: &str| {
+        let config = format!(
+            r#"{{"host":"127.0.0.1","port":{port},"username":"{USER}",
+                "auth":{{"method":"password","password":"{PASSWORD}"}},
+                "knownFingerprint":"{known}"}}"#
+        );
+        let config_c = CString::new(config).unwrap();
+        unsafe { tterm_session_connect_ssh(config_c.as_ptr()) }
+    };
+
+    assert!(connect("SHA256:the-old-host-key").is_null());
+    let err = last_error_json();
+    let actual = err["args"]["actual"].as_str().unwrap().to_string();
+    assert_eq!(actual, "SHA256:C2e8ILs2vZ7SvQxsU2QSoLr5dsCxeRgdbkWmO+LITpE");
+
+    let handle = connect(&actual);
+    assert!(!handle.is_null(), "改用新指紋後應連得上:{}", last_error_json());
+    tterm_session_free(handle);
+}
+
 /// 金鑰列表要算公鑰:JSON 通道 + 「回傳完整長度、buffer 不夠就加大重呼叫」。
 #[test]
 fn ssh_public_key_via_ffi() {
@@ -348,4 +373,64 @@ fn ssh_public_key_bad_pem_reports_error_json() {
     assert!(v["error"].as_str().is_some(), "失敗應走 error 欄位:{v}");
     assert_eq!(v["code"], "private_key_unreadable", "{v}");
     assert!(v["args"]["reason"].as_str().is_some(), "{v}");
+}
+
+fn generate_key(kind: &str, comment: &str, passphrase: Option<&str>) -> serde_json::Value {
+    let kind = CString::new(kind).unwrap();
+    let comment = CString::new(comment).unwrap();
+    let pass = passphrase.map(|p| CString::new(p).unwrap());
+    // 非冪等:一次給足協定上限,不准「不夠再重呼叫」
+    let mut buf = vec![0u8; tterm_ffi::SSH_GENERATE_KEY_MAX];
+    let n = unsafe {
+        tterm_ffi::tterm_ssh_generate_key(
+            kind.as_ptr(),
+            comment.as_ptr(),
+            pass.as_ref().map_or(std::ptr::null(), |p| p.as_ptr()),
+            buf.as_mut_ptr(),
+            buf.len(),
+        )
+    };
+    assert!(n <= buf.len(), "回傳超出協定上限:{n}");
+    serde_json::from_slice(&buf[..n]).expect("JSON")
+}
+
+/// 產生的私鑰丟回 tterm_ssh_public_key(金鑰列表那條路)要算出同一把公鑰。
+#[test]
+fn ssh_generate_key_via_ffi() {
+    let v = generate_key("ed25519", "phone", Some("pw"));
+    assert!(v["error"].is_null(), "{v}");
+    let private = v["privateKey"].as_str().unwrap();
+    assert!(private.starts_with("-----BEGIN OPENSSH PRIVATE KEY-----"));
+    assert_eq!(v["algorithm"], "ssh-ed25519");
+    assert_eq!(v["comment"], "phone");
+    let public = v["publicKey"].as_str().unwrap();
+    assert!(public.starts_with("ssh-ed25519 ") && public.ends_with(" phone"), "{public}");
+
+    let pem = CString::new(private).unwrap();
+    let pass = CString::new("pw").unwrap();
+    let mut buf = vec![0u8; 4096];
+    let n = unsafe {
+        tterm_ffi::tterm_ssh_public_key(pem.as_ptr(), pass.as_ptr(), buf.as_mut_ptr(), buf.len())
+    };
+    let derived: serde_json::Value = serde_json::from_slice(&buf[..n]).expect("JSON");
+    assert_eq!(derived["publicKey"], v["publicKey"]);
+    assert_eq!(derived["fingerprint"], v["fingerprint"]);
+
+    // 有 passphrase → 私鑰是加密的,沒 passphrase 解不開
+    assert!(russh::keys::decode_secret_key(private, None).is_err());
+    assert!(russh::keys::decode_secret_key(private, Some("pw")).is_ok());
+}
+
+/// RSA 4096 加密私鑰是最大的產物,也要落在協定上限內。
+#[test]
+fn ssh_generate_rsa_key_fits_protocol_cap() {
+    let v = generate_key("rsa", "a-fairly-long-comment@some-host.example.com", Some("pw"));
+    assert_eq!(v["algorithm"], "ssh-rsa", "{v}");
+    assert!(v.to_string().len() < tterm_ffi::SSH_GENERATE_KEY_MAX / 2);
+}
+
+#[test]
+fn ssh_generate_key_rejects_unknown_type() {
+    let v = generate_key("dsa", "", None);
+    assert!(v["error"].as_str().unwrap().contains("dsa"), "{v}");
 }

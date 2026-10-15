@@ -19,3 +19,18 @@ thiserror = "2.0"
 
 [profile.release]
 lto = "thin"
+
+# 測試跑 debug build,而金鑰產生(RSA 4096 找質數)與私鑰加解密(bcrypt-pbkdf)
+# 未最佳化時慢上百倍,一個測試就要幾十秒。只把這幾個數學密集的相依開最佳化。
+[profile.dev.package.crypto-bigint]
+opt-level = 3
+[profile.dev.package.crypto-primes]
+opt-level = 3
+[profile.dev.package.rsa]
+opt-level = 3
+[profile.dev.package.blowfish]
+opt-level = 3
+[profile.dev.package.bcrypt-pbkdf]
+opt-level = 3
+[profile.dev.package.sha2]
+opt-level = 3

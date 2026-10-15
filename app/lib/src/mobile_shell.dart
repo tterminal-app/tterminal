@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 
 import 'background_bridge.dart';
 import 'fold.dart';
+import 'host_key_mismatch_view.dart';
 import 'l10n.dart';
 import 'prefs.dart';
 import 'settings_page.dart';
@@ -689,6 +690,15 @@ class _MobileTerminalPageState extends State<_MobileTerminalPage> {
   Widget _terminalBody(TermTab tab, ({double top, double bottom})? foldGap) {
     if (tab.connecting) {
       return const Center(child: CircularProgressIndicator());
+    }
+    if (tab.session == null && tab.hostKeyMismatch != null) {
+      return HostKeyMismatchView(
+        key: ValueKey('tab-hostkey-mismatch-${tab.id}'),
+        tab: tab,
+        tabs: widget.tabs,
+        vault: widget.vault,
+        onReconnect: () => widget.tabs.reconnect(tab.id),
+      );
     }
     if (tab.session == null) {
       return Center(

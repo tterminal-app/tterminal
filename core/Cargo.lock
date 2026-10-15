@@ -2276,6 +2276,7 @@ name = "tterm-ssh"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "rand 0.10.2",
  "russh",
  "russh-sftp",
  "thiserror 2.0.19",

@@ -327,7 +327,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addKey => '新增 Key';
 
   @override
-  String get keysEmpty => '還沒有金鑰,按「新增 Key」貼上私鑰';
+  String get keysEmpty => '還沒有金鑰。按「產生金鑰」建立新的,或按「新增 Key」貼上既有的私鑰';
 
   @override
   String get addSshKey => '新增 SSH Key';
@@ -367,6 +367,114 @@ class AppLocalizationsZh extends AppLocalizations {
   String deleteFailed(String error) {
     return '刪除失敗:$error';
   }
+
+  @override
+  String get generateKey => '產生金鑰';
+
+  @override
+  String get generateSshKey => '產生 SSH 金鑰';
+
+  @override
+  String get keyType => '類型';
+
+  @override
+  String get keyTypeEd25519 => 'Ed25519(建議)';
+
+  @override
+  String get keyTypeRsa => 'RSA 4096(相容舊伺服器)';
+
+  @override
+  String get passphraseRepeatLabel => '再輸入一次 passphrase';
+
+  @override
+  String get keygenPassphraseHint =>
+      '可以留空。設定的話私鑰會用它加密;passphrase 會跟金鑰一起存在 vault,連線時自動帶入。';
+
+  @override
+  String get passphraseMismatch => '兩次輸入的 passphrase 不一樣';
+
+  @override
+  String get keygenNameRequired => '名稱為必填';
+
+  @override
+  String get generate => '產生';
+
+  @override
+  String get generatingKey => '產生中…';
+
+  @override
+  String get keyGenerated => '金鑰已產生';
+
+  @override
+  String keyGeneratedBody(String name) {
+    return '已存進 Keys(名稱「$name」)。把下面這行公鑰加到伺服器的 ~/.ssh/authorized_keys,再到 Host 設定選這把金鑰,就能用它登入。';
+  }
+
+  @override
+  String keygenFailed(String error) {
+    return '產生金鑰失敗:$error';
+  }
+
+  @override
+  String get done => '完成';
+
+  @override
+  String get undo => '復原';
+
+  @override
+  String get hostFingerprint => '主機指紋';
+
+  @override
+  String get hostFingerprintNone => '還沒記住。第一次連線時會記下伺服器的主機金鑰指紋,之後每次連線都會比對。';
+
+  @override
+  String get hostFingerprintClearHint =>
+      '只有伺服器重灌或換了主機金鑰時才需要清除。清除後,下次連線會直接信任伺服器出示的金鑰並重新記住。';
+
+  @override
+  String get hostFingerprintWillClear => '儲存後會清除,下次連線時重新記住伺服器出示的金鑰。';
+
+  @override
+  String get hostFingerprintAddressChanged =>
+      '位址或 Port 改了,儲存時會一併清除記住的指紋(那是舊主機的)。';
+
+  @override
+  String get hostKeyChangedTitle => '主機金鑰跟上次不一樣';
+
+  @override
+  String hostKeyChangedBody(String name) {
+    return '「$name」這次出示的主機金鑰,跟第一次連線時記住的不一樣,所以連線已經中止。\n\n可能是伺服器重灌、或管理員換了主機金鑰;但也可能有人正在攔截這條連線(中間人攻擊)。確認之前請不要繼續。';
+  }
+
+  @override
+  String get hostKeyRemembered => '記住的指紋';
+
+  @override
+  String get hostKeyPresented => '這次收到的指紋';
+
+  @override
+  String get hostKeyHowToVerify =>
+      '怎麼確認:請伺服器管理員在伺服器上執行 ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub,把結果跟「這次收到的指紋」逐字比對,必須完全一樣。';
+
+  @override
+  String get hostKeyTrustNew => '我確認主機換過了,改用新指紋…';
+
+  @override
+  String get hostKeyNotInVault => '這台 Host 已經不在 Vaults 裡,沒辦法在這裡更新指紋。';
+
+  @override
+  String get hostKeyTrustTitle => '改用新的主機金鑰?';
+
+  @override
+  String hostKeyTrustBody(String name) {
+    return '之後連到「$name」只認這把新金鑰,舊的指紋會被忘掉。如果其實是有人在攔截連線,改用之後你送出的所有內容(包括密碼)都可能被對方看到。';
+  }
+
+  @override
+  String get hostKeyTrustCheckbox => '我已經透過其他管道核對過新指紋,完全一致';
+
+  @override
+  String get hostKeyTrustConfirm => '改用新指紋並重新連線';
 
   @override
   String get tabBarPosition => '分頁列位置';

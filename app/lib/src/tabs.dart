@@ -15,6 +15,7 @@ class TermTab {
     this.error,
     this.connecting = false,
     this.noLocalShell = false,
+    this.hostId,
     String? label,
     String? connInfo,
   })  : label = label ?? '',
@@ -28,6 +29,10 @@ class TermTab {
   /// session 建立/連線失敗時的錯誤訊息(顯示在 tab 內容)。
   String? error;
 
+  /// 失敗原因是 host key 跟記住的指紋不符:錯誤畫面改顯示新舊指紋,
+  /// 並讓使用者確認後改用新指紋。
+  HostKeyMismatchException? hostKeyMismatch;
+
   /// SSH 連線進行中(尚未 attach session)。
   bool connecting;
 
@@ -39,6 +44,9 @@ class TermTab {
 
   /// 連線資訊(SSH:`user@address:port`;本地為空字串)。狀態列顯示用。
   final String connInfo;
+
+  /// 從 vault host 開的 SSH 分頁:那台 host 的 record id(改用新指紋要寫回它)。
+  final String? hostId;
 
   /// 重新建立 session 的方法(本地=respawn shell、SSH=原設定重連);
   /// null = 不支援重連(iOS 無本地 shell 的導引分頁)。
@@ -111,9 +119,16 @@ class TabsController extends ChangeNotifier {
     String label,
     Future<NativeSession> Function() connect, {
     String connInfo = '',
+    String? hostId,
   }) {
     final id = _nextId++;
-    final tab = TermTab(id, connecting: true, label: label, connInfo: connInfo);
+    final tab = TermTab(
+      id,
+      connecting: true,
+      label: label,
+      connInfo: connInfo,
+      hostId: hostId,
+    );
     tab.connectFn = connect;
     tabs.add(tab);
     _active = tabs.length - 1;
@@ -137,6 +152,7 @@ class TabsController extends ChangeNotifier {
       final tab = _byId(id);
       if (tab == null) return;
       tab.error = '$e';
+      tab.hostKeyMismatch = e is HostKeyMismatchException ? e : null;
       tab.connecting = false;
       notifyListeners();
     });
@@ -151,6 +167,7 @@ class TabsController extends ChangeNotifier {
     tab.session = null;
     tab.exited = false;
     tab.error = null;
+    tab.hostKeyMismatch = null;
     tab.title = '';
     tab.connecting = true;
     notifyListeners();

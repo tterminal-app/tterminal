@@ -53,8 +53,14 @@ Record {
 ```json
 { "address": "example.com", "port": 22, "username": "root",
   "auth": {"method": "password" | "key" | "none", "keyId": "<uuid>?", "password": "?"},
-  "note": "" }
+  "note": "", "pinned": true,
+  "hostKeyFingerprint": "SHA256:...?" }
 ```
+
+`hostKeyFingerprint` 是第一次連線時記下的 host key 指紋(TOFU),之後每次連線都比對,
+不符就拒絕(core 回錯誤代碼 `host_key_mismatch`,帶新舊指紋)。要換掉它只有兩條路,
+都要使用者明確動作:錯誤畫面上勾選「已核對新指紋」後改用新指紋,或在編輯 Host
+手動清除(位址 / port 改了也會一併清除,那是舊主機的指紋);清除後下次連線重新記住。
 
 `ssh_key`:
 ```json
@@ -67,6 +73,10 @@ Record {
 公鑰**不存**:UI 要顯示 / 複製時,由 `tterm_ssh_public_key` 從私鑰現算
 (OpenSSH 私鑰的公鑰段是明文,設了 passphrase 也算得出來),存了反而要
 跟私鑰保持同步。
+
+在 app 內產生的金鑰(Keys →「產生金鑰」,`tterm_ssh_generate_key`:ed25519 或
+RSA 4096)存的也是同一種 record:OpenSSH 格式私鑰,設了 passphrase 就以
+aes256-ctr + bcrypt-pbkdf 加密(與 ssh-keygen 相同),passphrase 一併存在 `passphrase`。
 
 ### 1.3 HLC(混合邏輯時鐘)
 

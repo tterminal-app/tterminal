@@ -612,6 +612,27 @@ async fn pubkey_auth_works() {
     assert!(screen.contains("KEYAUTH-OK"), "pubkey 認證後回聲:\n{screen}");
 }
 
+/// app 內產生(帶 passphrase)的金鑰,原樣存、原樣拿來登入。
+#[tokio::test]
+async fn generated_key_authenticates() {
+    let key = tterm_ssh::generate_key(tterm_ssh::KeyKind::Ed25519, "phone", Some("pw"))
+        .expect("generate");
+    let port = start_server().await;
+    let (screen, _) = run_shell(
+        target(
+            port,
+            ClientAuth::KeyData {
+                pem: key.private_key,
+                passphrase: Some("pw".into()),
+            },
+            None,
+        ),
+        b"GENKEY-OK\r",
+    )
+    .await;
+    assert!(screen.contains("GENKEY-OK"), "產生的金鑰登入後回聲:\n{screen}");
+}
+
 #[tokio::test]
 async fn wrong_password_rejected() {
     let port = start_server().await;

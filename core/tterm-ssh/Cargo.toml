@@ -12,4 +12,6 @@ russh-sftp = "2"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync", "io-util", "net"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
+# 產生金鑰用的亂數;與 russh 同一版、同一個 thread_rng(不多拉 crate)
+rand = { version = "0.10", default-features = false, features = ["thread_rng"] }
 tterm-term = { path = "../tterm-term" }

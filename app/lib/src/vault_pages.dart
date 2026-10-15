@@ -251,6 +251,14 @@ Future<void> _editHost(
   final note = TextEditingController(text: data['note'] as String? ?? '');
   var method = auth['method'] as String? ?? 'password';
   String? keyId = auth['keyId'] as String?;
+  // 記住的 host key 指紋(第一次連線時存的):可以手動清除;位址或 port 改了
+  // 也一併清掉 —— 那是舊主機的指紋,留著只會讓下次連線報「主機金鑰不符」。
+  final fingerprint = data['hostKeyFingerprint'] as String?;
+  var clearFingerprint = false;
+  bool endpointChanged() =>
+      address.text.trim() != (data['address'] as String? ?? '') ||
+      (int.tryParse(port.text.trim()) ?? 22).clamp(1, 65535) !=
+          (data['port'] ?? 22);
 
   await showDialog<void>(
     context: context,
@@ -273,6 +281,7 @@ Future<void> _editHost(
                   key: const Key('host-address'),
                   controller: address,
                   decoration: InputDecoration(labelText: l10n.addressRequiredLabel),
+                  onChanged: (_) => setState(() {}),
                 ),
                 Row(children: [
                   Expanded(
@@ -281,6 +290,7 @@ Future<void> _editHost(
                       controller: port,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(labelText: l10n.port),
+                      onChanged: (_) => setState(() {}),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -327,6 +337,14 @@ Future<void> _editHost(
                   controller: note,
                   decoration: InputDecoration(labelText: l10n.note),
                 ),
+                if (existing != null)
+                  _HostFingerprintSection(
+                    fingerprint: fingerprint,
+                    cleared: clearFingerprint,
+                    endpointChanged: endpointChanged(),
+                    onClear: () => setState(() => clearFingerprint = true),
+                    onUndo: () => setState(() => clearFingerprint = false),
+                  ),
               ]),
             ),
           ),
@@ -374,6 +392,10 @@ Future<void> _editHost(
                 } else {
                   newData.remove('note');
                 }
+                // 下次連線重新記住(TOFU)
+                if (clearFingerprint || endpointChanged()) {
+                  newData.remove('hostKeyFingerprint');
+                }
                 service.upsert(
                   id: existing?.id,
                   kind: 'host',
@@ -389,6 +411,88 @@ Future<void> _editHost(
       },
     ),
   );
+}
+
+/// 編輯 Host 對話框裡的主機指紋:顯示記住的指紋,可清除(儲存才生效)。
+class _HostFingerprintSection extends StatelessWidget {
+  const _HostFingerprintSection({
+    required this.fingerprint,
+    required this.cleared,
+    required this.endpointChanged,
+    required this.onClear,
+    required this.onUndo,
+  });
+
+  /// null = 還沒記住(還沒連線過,或剛清掉)。
+  final String? fingerprint;
+  final bool cleared;
+
+  /// 位址或 port 改了:存檔時指紋一定會清掉。
+  final bool endpointChanged;
+  final VoidCallback onClear;
+  final VoidCallback onUndo;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final fingerprint = this.fingerprint;
+    final willClear = cleared || endpointChanged;
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Expanded(
+              child: Text(
+                l10n.hostFingerprint,
+                style: theme.textTheme.labelMedium,
+              ),
+            ),
+            if (fingerprint != null && cleared)
+              TextButton(
+                key: const Key('btn-undo-clear-fingerprint'),
+                onPressed: onUndo,
+                child: Text(l10n.undo),
+              )
+            else if (fingerprint != null && !endpointChanged)
+              TextButton.icon(
+                key: const Key('btn-clear-fingerprint'),
+                onPressed: onClear,
+                icon: const Icon(Icons.delete_outline, size: 16),
+                label: Text(l10n.clear),
+              ),
+          ]),
+          if (fingerprint == null)
+            Text(
+              l10n.hostFingerprintNone,
+              key: const Key('host-fingerprint-none'),
+              style: theme.textTheme.bodySmall,
+            )
+          else ...[
+            SelectableText(
+              fingerprint,
+              key: const Key('host-fingerprint'),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 12,
+                decoration: willClear ? TextDecoration.lineThrough : null,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              cleared
+                  ? l10n.hostFingerprintWillClear
+                  : endpointChanged
+                  ? l10n.hostFingerprintAddressChanged
+                  : l10n.hostFingerprintClearHint,
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
 // ---- Keys ----
@@ -412,6 +516,13 @@ class _KeysTab extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall),
               const Spacer(),
               FilledButton.icon(
+                key: const Key('btn-generate-key'),
+                onPressed: () => _generateKey(context, service),
+                icon: const Icon(Icons.auto_awesome_outlined, size: 18),
+                label: Text(l10n.generateKey),
+              ),
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
                 key: const Key('btn-add-key'),
                 onPressed: () => _editKey(context, service),
                 icon: const Icon(Icons.add, size: 18),
@@ -515,6 +626,255 @@ Future<void> _editKey(
       ],
     ),
   );
+}
+
+// ---- 產生金鑰(手機上沒有 ssh-keygen)----
+//
+// 在 core 產生 OpenSSH 格式私鑰,存成跟「貼上匯入」一樣的 ssh_key record,
+// 之後連線、算公鑰都走同一條路。產生完直接秀公鑰給使用者複製。
+
+Future<void> _generateKey(BuildContext context, VaultService service) =>
+    showDialog<void>(
+      context: context,
+      // 產生中別被點外面關掉;結果一出來就已經存進 vault
+      barrierDismissible: false,
+      builder: (context) => _GenerateKeyDialog(service: service),
+    );
+
+class _GenerateKeyDialog extends StatefulWidget {
+  const _GenerateKeyDialog({required this.service});
+
+  final VaultService service;
+
+  @override
+  State<_GenerateKeyDialog> createState() => _GenerateKeyDialogState();
+}
+
+class _GenerateKeyDialogState extends State<_GenerateKeyDialog> {
+  static String _defaultName(String kind) => 'tterminal-$kind';
+
+  var _kind = GeneratedSshKey.kinds.first;
+  late final _name = TextEditingController(text: _defaultName(_kind));
+  final _passphrase = TextEditingController();
+  final _repeat = TextEditingController();
+
+  /// 名稱沒動過就跟著類型換預設名稱。
+  var _nameEdited = false;
+  var _busy = false;
+  String? _error;
+
+  /// 產生並存好的金鑰(與存檔時的名稱);有值就換成結果畫面。
+  ({GeneratedSshKey key, String name})? _result;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _passphrase.dispose();
+    _repeat.dispose();
+    super.dispose();
+  }
+
+  Future<void> _generate() async {
+    final name = _name.text.trim();
+    final passphrase = _passphrase.text;
+    if (name.isEmpty) {
+      setState(() => _error = l10n.keygenNameRequired);
+      return;
+    }
+    if (passphrase.isNotEmpty && passphrase != _repeat.text) {
+      setState(() => _error = l10n.passphraseMismatch);
+      return;
+    }
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      // comment 用名稱:authorized_keys 裡看得出是哪把
+      final key = await GeneratedSshKey.generate(
+        kind: _kind,
+        comment: name,
+        passphrase: passphrase,
+      );
+      // 跟貼上匯入的金鑰同一種 record(見 _editKey)
+      widget.service.upsert(
+        kind: 'ssh_key',
+        name: name,
+        data: {
+          'privateKey': key.privateKey,
+          if (passphrase.isNotEmpty) 'passphrase': passphrase,
+        },
+      );
+      // 列表不必再跑一次 KDF 算同一把公鑰
+      _publicKeyCache['${key.privateKey} $passphrase'] = key.publicKey;
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _result = (key: key, name: name);
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _error = l10n.keygenFailed('$e');
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final result = _result;
+    if (result != null) return _buildResult(context, result.key, result.name);
+    final theme = Theme.of(context);
+    final error = _error;
+    return AlertDialog(
+      title: Text(l10n.generateSshKey),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            TextField(
+              key: const Key('keygen-name'),
+              controller: _name,
+              enabled: !_busy,
+              decoration: InputDecoration(labelText: l10n.nameRequiredLabel),
+              onChanged: (_) => _nameEdited = true,
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              key: const Key('keygen-type'),
+              initialValue: _kind,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: l10n.keyType),
+              items: [
+                DropdownMenuItem(
+                  value: 'ed25519',
+                  child: Text(l10n.keyTypeEd25519),
+                ),
+                DropdownMenuItem(value: 'rsa', child: Text(l10n.keyTypeRsa)),
+              ],
+              onChanged: _busy
+                  ? null
+                  : (v) => setState(() {
+                      _kind = v ?? _kind;
+                      if (!_nameEdited) _name.text = _defaultName(_kind);
+                    }),
+            ),
+            TextField(
+              key: const Key('keygen-passphrase'),
+              controller: _passphrase,
+              obscureText: true,
+              enabled: !_busy,
+              decoration: InputDecoration(
+                labelText: l10n.passphraseOptionalLabel,
+                helperText: l10n.keygenPassphraseHint,
+                helperMaxLines: 4,
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            if (_passphrase.text.isNotEmpty)
+              TextField(
+                key: const Key('keygen-passphrase-repeat'),
+                controller: _repeat,
+                obscureText: true,
+                enabled: !_busy,
+                decoration: InputDecoration(
+                  labelText: l10n.passphraseRepeatLabel,
+                ),
+              ),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    error,
+                    key: const Key('keygen-error'),
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                ),
+              ),
+            if (_busy)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Row(children: [
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(l10n.generatingKey),
+                ]),
+              ),
+          ]),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          key: const Key('btn-confirm-generate-key'),
+          onPressed: _busy ? null : _generate,
+          child: Text(l10n.generate),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResult(BuildContext context, GeneratedSshKey key, String name) {
+    final theme = Theme.of(context);
+    final info = key.publicKey;
+    return AlertDialog(
+      title: Text(l10n.keyGenerated),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.keyGeneratedBody(name)),
+              const SizedBox(height: 12),
+              Text(
+                l10n.publicKeyWithFingerprint(info.fingerprint),
+                style: theme.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: SelectableText(
+                  info.openssh,
+                  key: const Key('keygen-public'),
+                  style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          key: const Key('btn-keygen-done'),
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.done),
+        ),
+        FilledButton.icon(
+          key: const Key('btn-copy-generated-pubkey'),
+          onPressed: () => _copyPublicKey(context, info),
+          icon: const Icon(Icons.copy_outlined, size: 18),
+          label: Text(l10n.copyPublicKey),
+        ),
+      ],
+    );
+  }
 }
 
 // ---- 公鑰(從私鑰算出來,不另外存)----

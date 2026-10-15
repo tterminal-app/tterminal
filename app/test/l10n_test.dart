@@ -17,6 +17,7 @@ import 'package:tterm_app/src/prefs.dart';
 import 'package:tterm_app/src/sync_client.dart';
 import 'package:tterm_app/src/tabs.dart';
 import 'package:tterm_app/src/term_ffi.dart';
+import 'package:tterm_app/src/vault_pages.dart';
 import 'package:tterm_app/src/vault_service.dart';
 
 /// 中日韓文字與全形標點(英文介面不該出現,使用者資料除外)。
@@ -214,6 +215,74 @@ void main() {
       await tester.pump();
       expect(find.text('web'), findsOneWidget);
       expect(find.text('Hosts'), findsOneWidget);
+      _expectNoCjk(tester);
+    });
+
+    testWidgets('Vaults:編輯 Host 的指紋區、產生金鑰對話框', (tester) async {
+      tabs = TabsController(refillOnEmpty: false);
+      vault.upsert(
+        kind: 'host',
+        name: 'web',
+        data: {'address': 'w.example.com', 'hostKeyFingerprint': 'SHA256:abc'},
+      );
+      await tester.pumpWidget(_app(VaultsPage(service: vault)));
+      await tester.pump();
+
+      await tester.tap(find.text('web'));
+      await tester.pumpAndSettle();
+      expect(find.text('Host key fingerprint'), findsOneWidget);
+      _expectNoCjk(tester);
+      await tester.ensureVisible(find.byKey(const Key('btn-clear-fingerprint')));
+      await tester.tap(find.byKey(const Key('btn-clear-fingerprint')));
+      await tester.pump();
+      expect(find.textContaining('Will be cleared when you save'), findsOneWidget);
+      _expectNoCjk(tester);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Keys'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Hit “Generate Key”'), findsOneWidget);
+      _expectNoCjk(tester);
+      await tester.tap(find.byKey(const Key('btn-generate-key')));
+      await tester.pumpAndSettle();
+      expect(find.text('Generate SSH Key'), findsOneWidget);
+      await tester.enterText(find.byKey(const Key('keygen-passphrase')), 'x');
+      await tester.pump();
+      expect(find.text('Repeat passphrase'), findsOneWidget);
+      _expectNoCjk(tester);
+    });
+
+    testWidgets('手機:host key 不符的畫面與確認對話框', (tester) async {
+      tabs = TabsController(refillOnEmpty: false);
+      final hostId = vault.upsert(
+        kind: 'host',
+        name: 'web',
+        data: {'address': 'w.example.com', 'hostKeyFingerprint': 'SHA256:old'},
+      );
+      final id = tabs.newAsyncTab(
+        'web',
+        () => Future.error(
+          HostKeyMismatchException(expected: 'SHA256:old', actual: 'SHA256:new'),
+        ),
+        hostId: hostId,
+      );
+      await tester.pumpWidget(
+        _app(MobileShell(tabs: tabs, prefs: prefs, vault: vault)),
+      );
+      await tester.pump();
+      expect(find.text('The host key has changed'), findsOneWidget, reason: '連線列表的錯誤摘要');
+      _expectNoCjk(tester);
+
+      await tester.tap(find.byKey(ValueKey('session-$id')));
+      await tester.pumpAndSettle();
+      expect(find.text('Fingerprint presented this time'), findsOneWidget);
+      _expectNoCjk(tester);
+
+      await tester.ensureVisible(find.byKey(ValueKey('btn-trust-hostkey-$id')));
+      await tester.tap(find.byKey(ValueKey('btn-trust-hostkey-$id')));
+      await tester.pumpAndSettle();
+      expect(find.text('Use the new host key?'), findsOneWidget);
       _expectNoCjk(tester);
     });
 

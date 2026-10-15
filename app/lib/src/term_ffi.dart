@@ -14,7 +14,7 @@ import 'package:ffi/ffi.dart';
 import 'l10n.dart';
 import 'native_error.dart';
 
-const kExpectedAbiVersion = 14;
+const kExpectedAbiVersion = 15;
 
 /// 與 alacritty_terminal cell flags 對齊(bits 由 Rust 測試鎖定)。
 abstract final class CellFlags {
@@ -130,6 +130,22 @@ typedef SshPublicKeyC =
     );
 typedef SshPublicKeyD =
     int Function(ffi.Pointer<Utf8>, ffi.Pointer<Utf8>, ffi.Pointer<ffi.Uint8>, int);
+typedef SshGenerateKeyC =
+    ffi.Size Function(
+      ffi.Pointer<Utf8>,
+      ffi.Pointer<Utf8>,
+      ffi.Pointer<Utf8>,
+      ffi.Pointer<ffi.Uint8>,
+      ffi.Size,
+    );
+typedef SshGenerateKeyD =
+    int Function(
+      ffi.Pointer<Utf8>,
+      ffi.Pointer<Utf8>,
+      ffi.Pointer<Utf8>,
+      ffi.Pointer<ffi.Uint8>,
+      int,
+    );
 typedef VersionC = ffi.Uint32 Function();
 typedef VersionD = int Function();
 
@@ -223,6 +239,9 @@ class TermFfi {
     );
     sshPublicKey = _lib.lookupFunction<SshPublicKeyC, SshPublicKeyD>(
       'tterm_ssh_public_key',
+    );
+    sshGenerateKey = _lib.lookupFunction<SshGenerateKeyC, SshGenerateKeyD>(
+      'tterm_ssh_generate_key',
     );
     free = _lib.lookupFunction<FreeC, FreeD>('tterm_session_free');
     write = _lib.lookupFunction<WriteC, WriteD>('tterm_session_write');
@@ -351,6 +370,7 @@ class TermFfi {
   late final ConnectSshD connectSsh;
   late final StrOutD sshFingerprint;
   late final SshPublicKeyD sshPublicKey;
+  late final SshGenerateKeyD sshGenerateKey;
   late final FreeD free;
   late final WriteD write;
   late final ResizeD resize;
@@ -443,6 +463,37 @@ class SshConnectException implements Exception {
   String toString() => message;
 }
 
+/// 伺服器出示的 host key 跟記住的指紋不符,連線已中止(Rust 錯誤代碼
+/// `host_key_mismatch`)。錯誤畫面要拿新舊指紋給使用者比對、決定要不要
+/// 改用新指紋,所以帶著兩個指紋,不只是一串訊息。
+class HostKeyMismatchException extends SshConnectException {
+  HostKeyMismatchException({required this.expected, required this.actual})
+    : super(l10n.hostKeyChangedTitle);
+
+  /// 記住的指紋(`SHA256:...`)。
+  final String expected;
+
+  /// 這次伺服器出示的指紋。
+  final String actual;
+
+  /// 從 `tterm_last_error` 的原文(錯誤 JSON)認出 host key 不符;不是就回 null。
+  static HostKeyMismatchException? tryParse(String raw) {
+    try {
+      final json = jsonDecode(raw);
+      if (json is! Map<String, dynamic> || json['code'] != 'host_key_mismatch') {
+        return null;
+      }
+      final args = (json['args'] as Map?)?.cast<String, dynamic>() ?? const {};
+      final expected = args['expected'];
+      final actual = args['actual'];
+      if (expected is! String || actual is! String) return null;
+      return HostKeyMismatchException(expected: expected, actual: actual);
+    } on FormatException {
+      return null;
+    }
+  }
+}
+
 /// 私鑰算不出公鑰(格式不認得、舊式 PEM 少了 passphrase…)。
 class SshKeyException implements Exception {
   SshKeyException(this.message);
@@ -508,6 +559,64 @@ class SshPublicKeyInfo {
       algorithm: map['algorithm'] as String? ?? '',
       fingerprint: map['fingerprint'] as String? ?? '',
       comment: map['comment'] as String? ?? '',
+    );
+  }
+}
+
+/// 在 app 內產生的 SSH 金鑰對(手機上沒有 ssh-keygen)。
+class GeneratedSshKey {
+  const GeneratedSshKey({required this.privateKey, required this.publicKey});
+
+  /// OpenSSH 格式私鑰(與 ssh-keygen 相同);有 passphrase 時已加密。
+  final String privateKey;
+
+  final SshPublicKeyInfo publicKey;
+
+  /// 可選的種類(同 `ssh-keygen -t`):ed25519(預設)、rsa(4096 bits)。
+  static const kinds = ['ed25519', 'rsa'];
+
+  /// 與 core 的 SSH_GENERATE_KEY_MAX 一致:產生金鑰不是冪等的(重呼叫就是
+  /// 另一把),buffer 一次給足、絕不「不夠再重呼叫」。
+  static const _cap = 16 * 1024;
+
+  /// 產生新金鑰。[passphrase] 空字串 = 私鑰不加密。RSA 要找質數、加密要跑
+  /// KDF,整段丟背景 isolate 以免卡 UI。
+  static Future<GeneratedSshKey> generate({
+    String kind = 'ed25519',
+    String comment = '',
+    String passphrase = '',
+  }) async {
+    final json = await Isolate.run(() {
+      final ffiLib = TermFfi();
+      final kindC = kind.toNativeUtf8();
+      final commentC = comment.toNativeUtf8();
+      final passC = passphrase.toNativeUtf8();
+      final buf = calloc<ffi.Uint8>(_cap);
+      try {
+        final n = ffiLib.sshGenerateKey(kindC, commentC, passC, buf, _cap);
+        if (n > _cap) {
+          return jsonEncode({'error': 'generated key exceeds $_cap bytes'});
+        }
+        return utf8Decode(buf.asTypedList(n));
+      } finally {
+        // 私鑰別留在已釋放的記憶體裡
+        buf.asTypedList(_cap).fillRange(0, _cap, 0);
+        calloc.free(buf);
+        calloc.free(kindC);
+        calloc.free(commentC);
+        calloc.free(passC);
+      }
+    });
+    final map = jsonDecode(json) as Map<String, dynamic>;
+    if (map['error'] != null) throw SshKeyException(describeNativeError(map));
+    return GeneratedSshKey(
+      privateKey: map['privateKey'] as String,
+      publicKey: SshPublicKeyInfo(
+        openssh: map['publicKey'] as String? ?? '',
+        algorithm: map['algorithm'] as String? ?? '',
+        fingerprint: map['fingerprint'] as String? ?? '',
+        comment: map['comment'] as String? ?? '',
+      ),
     );
   }
 }
@@ -610,9 +719,9 @@ class NativeSession {
     });
     final error = result['error'] as String?;
     if (error != null) {
-      throw SshConnectException(
-        error.isEmpty ? l10n.sshConnectFailed : describeLastError(error),
-      );
+      if (error.isEmpty) throw SshConnectException(l10n.sshConnectFailed);
+      throw HostKeyMismatchException.tryParse(error) ??
+          SshConnectException(describeLastError(error));
     }
     final session = NativeSession._(
       TermFfi(),

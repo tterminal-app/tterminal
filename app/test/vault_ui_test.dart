@@ -1,4 +1,5 @@
-// Vaults 頁(Hosts/Keys CRUD)與設定頁(分頁位置、配對匯入匯出)widget 測試。
+// Vaults 頁(Hosts/Keys CRUD、主機指紋、產生金鑰)與設定頁(分頁位置、配對匯入匯出)
+// widget 測試。
 // VaultService 用真 FFI + 暫存目錄。
 
 import 'dart:io';
@@ -8,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tterm_app/src/prefs.dart';
 import 'package:tterm_app/src/settings_page.dart';
+import 'package:tterm_app/src/term_ffi.dart';
 import 'package:tterm_app/src/vault_pages.dart';
 import 'package:tterm_app/src/vault_service.dart';
 
@@ -174,6 +176,101 @@ void main() {
     expect(auth['password'], 'keep-me', reason: '沒在編的 auth 欄位要保留');
   });
 
+  // ---- 記住的主機指紋(第一次連線時存的)----
+
+  const rememberedFp = 'SHA256:C2e8ILs2vZ7SvQxsU2QSoLr5dsCxeRgdbkWmO+LITpE';
+  String addHostWithFingerprint() => service.upsert(kind: 'host', name: 'srv', data: {
+        'address': '10.0.0.9',
+        'port': 22,
+        'username': 'root',
+        'auth': {'method': 'password', 'password': 'pw'},
+        'pinned': true,
+        'hostKeyFingerprint': rememberedFp,
+      });
+
+  Future<void> tapVisible(WidgetTester tester, Key key) async {
+    await tester.ensureVisible(find.byKey(key));
+    await tester.tap(find.byKey(key));
+    await tester.pump();
+  }
+
+  testWidgets('編輯 Host:顯示記住的指紋,清除要按儲存才生效', (tester) async {
+    final id = addHostWithFingerprint();
+    await pumpVaults(tester);
+    await tester.tap(find.text('srv'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<SelectableText>(find.byKey(const Key('host-fingerprint'))).data,
+      rememberedFp,
+    );
+    expect(find.textContaining('只有伺服器重灌或換了主機金鑰時才需要清除'), findsOneWidget);
+
+    // 清除後按取消:不變
+    await tapVisible(tester, const Key('btn-clear-fingerprint'));
+    expect(find.textContaining('儲存後會清除'), findsOneWidget);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    expect(service.byId(id)!.data['hostKeyFingerprint'], rememberedFp);
+
+    // 清除 → 復原 → 儲存:不變
+    await tester.tap(find.text('srv'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, const Key('btn-clear-fingerprint'));
+    await tapVisible(tester, const Key('btn-undo-clear-fingerprint'));
+    await tester.tap(find.byKey(const Key('btn-save-host')));
+    await tester.pumpAndSettle();
+    expect(service.byId(id)!.data['hostKeyFingerprint'], rememberedFp);
+
+    // 清除 → 儲存:指紋沒了,其他欄位都在
+    await tester.tap(find.text('srv'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, const Key('btn-clear-fingerprint'));
+    await tester.tap(find.byKey(const Key('btn-save-host')));
+    await tester.pumpAndSettle();
+    final saved = service.byId(id)!;
+    expect(saved.data.containsKey('hostKeyFingerprint'), isFalse);
+    expect(saved.data['pinned'], isTrue);
+    expect(saved.data['auth']['password'], 'pw');
+
+    // 再打開:「還沒記住」,沒有清除鈕
+    await tester.tap(find.text('srv'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('host-fingerprint-none')), findsOneWidget);
+    expect(find.byKey(const Key('btn-clear-fingerprint')), findsNothing);
+  });
+
+  testWidgets('編輯 Host:位址或 port 改了,儲存時一併清除指紋', (tester) async {
+    final id = addHostWithFingerprint();
+    await pumpVaults(tester);
+
+    // 新增 Host 的對話框沒有指紋區
+    await tester.tap(find.byKey(const Key('btn-add-host')));
+    await tester.pumpAndSettle();
+    expect(find.text('主機指紋'), findsNothing);
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('srv'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('host-port')), '2222');
+    await tester.pump();
+    expect(find.textContaining('位址或 Port 改了'), findsOneWidget);
+    expect(find.byKey(const Key('btn-clear-fingerprint')), findsNothing);
+    // 改回原值就不清
+    await tester.enterText(find.byKey(const Key('host-port')), '22');
+    await tester.pump();
+    expect(find.textContaining('位址或 Port 改了'), findsNothing);
+
+    await tester.enterText(find.byKey(const Key('host-address')), '10.0.0.10');
+    await tester.pump();
+    expect(find.textContaining('位址或 Port 改了'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('btn-save-host')));
+    await tester.pumpAndSettle();
+    final saved = service.byId(id)!;
+    expect(saved.data['address'], '10.0.0.10');
+    expect(saved.data.containsKey('hostKeyFingerprint'), isFalse);
+  });
+
   testWidgets('Key 新增 + Host 引用金鑰', (tester) async {
     await pumpVaults(tester);
 
@@ -312,6 +409,107 @@ AWcsTbaugcCapPoqvicVAAAAD3R0ZXJtLXRlc3QtaG9zdAECAwQFBg==
     await tester.tap(find.byKey(const Key('btn-copy-pubkey')));
     await tester.pump();
     expect(copied.single, testPublicKey);
+  });
+
+  // ---- 產生金鑰(手機上沒有 ssh-keygen)----
+
+  testWidgets('產生金鑰:ed25519 + passphrase → 存成 ssh_key,直接複製公鑰', (tester) async {
+    final copied = <String>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied.add((call.arguments as Map<Object?, Object?>)['text']! as String);
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+
+    await pumpVaults(tester);
+    await tester.tap(find.text('Keys'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('按「產生金鑰」建立新的'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('btn-generate-key')));
+    await tester.pumpAndSettle();
+    final nameField = find.byKey(const Key('keygen-name'));
+    expect(tester.widget<TextField>(nameField).controller!.text, 'tterminal-ed25519');
+    await tester.enterText(nameField, 'phone');
+    // 有 passphrase 才出現「再輸入一次」
+    expect(find.byKey(const Key('keygen-passphrase-repeat')), findsNothing);
+    await tester.enterText(find.byKey(const Key('keygen-passphrase')), 'pw');
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('keygen-passphrase-repeat')), 'pw');
+    await tester.tap(find.byKey(const Key('btn-confirm-generate-key')));
+    await tester.pump();
+    await waitFor(tester, find.byKey(const Key('keygen-public')));
+
+    final public =
+        tester.widget<SelectableText>(find.byKey(const Key('keygen-public'))).data!;
+    expect(public, startsWith('ssh-ed25519 AAAA'));
+    expect(public, endsWith(' phone'), reason: 'comment 用名稱,authorized_keys 裡認得出來');
+
+    // 跟貼上匯入同一種 record
+    final key = service.sshKeys.single;
+    expect(key.name, 'phone');
+    final pem = key.data['privateKey'] as String;
+    expect(pem, startsWith('-----BEGIN OPENSSH PRIVATE KEY-----'));
+    expect(key.data['passphrase'], 'pw');
+    // 存下來的私鑰算得出同一把公鑰(連線、列表都走這條路)
+    final derived = await tester.runAsync(
+      () => SshPublicKeyInfo.derive(pem, passphrase: 'pw'),
+    );
+    expect(derived!.openssh, public);
+
+    await tester.tap(find.byKey(const Key('btn-copy-generated-pubkey')));
+    await tester.pump();
+    expect(copied.single, public);
+
+    await tester.tap(find.byKey(const Key('btn-keygen-done')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('keygen-public')), findsNothing);
+    expect(find.text('phone'), findsOneWidget);
+    await waitFor(tester, find.textContaining(derived.fingerprint));
+  });
+
+  testWidgets('產生金鑰:名稱空白、passphrase 兩次不同 → 不產生', (tester) async {
+    await pumpVaults(tester);
+    await tester.tap(find.text('Keys'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('btn-generate-key')));
+    await tester.pumpAndSettle();
+
+    // 換成 RSA:名稱沒動過就跟著換預設
+    await tester.tap(find.byKey(const Key('keygen-type')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('RSA 4096(相容舊伺服器)').last);
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<TextField>(find.byKey(const Key('keygen-name'))).controller!.text,
+      'tterminal-rsa',
+    );
+
+    await tester.enterText(find.byKey(const Key('keygen-passphrase')), 'a');
+    await tester.pump();
+    await tester.enterText(find.byKey(const Key('keygen-passphrase-repeat')), 'b');
+    await tester.tap(find.byKey(const Key('btn-confirm-generate-key')));
+    await tester.pump();
+    expect(find.text('兩次輸入的 passphrase 不一樣'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('keygen-name')), '  ');
+    await tester.tap(find.byKey(const Key('btn-confirm-generate-key')));
+    await tester.pump();
+    expect(find.text('名稱為必填'), findsOneWidget);
+
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
+    expect(service.sshKeys, isEmpty);
   });
 
   testWidgets('設定頁:分頁位置切換 + 未設定同步的畫面', (tester) async {

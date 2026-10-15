@@ -18,6 +18,9 @@ use russh::keys::{HashAlg, PrivateKeyWithHashAlg};
 use russh::{ChannelMsg, Disconnect};
 use tokio::sync::mpsc;
 
+mod keygen;
+pub use keygen::{generate_key, GeneratedKey, KeyKind};
+
 #[derive(Clone, Debug)]
 pub struct SshTarget {
     pub host: String,
