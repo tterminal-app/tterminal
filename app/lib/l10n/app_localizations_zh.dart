@@ -735,4 +735,134 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get errDecryptFailed => '解密失敗(金鑰不符或資料被竄改)';
+
+  @override
+  String get purchaseSection => '試用與解鎖';
+
+  @override
+  String get accessLoading => '正在確認購買狀態…';
+
+  @override
+  String get accessNotStarted => '還沒開始試用';
+
+  @override
+  String get accessNotStartedHint => '想用的時候再開始就好,開始後 14 天內所有功能都能免費用。';
+
+  @override
+  String accessTrial(int days) {
+    return '試用中,還有 $days 天';
+  }
+
+  @override
+  String accessTrialHint(String date) {
+    return '所有功能可以用到 $date。';
+  }
+
+  @override
+  String get accessExpired => '試用已結束';
+
+  @override
+  String get accessExpiredHint => '主機、金鑰和同步照常可以用;要開新的連線需要先解鎖。';
+
+  @override
+  String get accessUnlocked => '已解鎖';
+
+  @override
+  String get accessUnlockedHint => '謝謝支持!之後的 1.x 更新都包含在內。';
+
+  @override
+  String get startTrialButton => '開始 14 天試用';
+
+  @override
+  String get unlockButton => '解鎖';
+
+  @override
+  String unlockWithPrice(String price) {
+    return '解鎖 $price';
+  }
+
+  @override
+  String get restorePurchases => '恢復購買';
+
+  @override
+  String get notNow => '之後再說';
+
+  @override
+  String get tryAgain => '再試一次';
+
+  @override
+  String get trialIntroTitle => '先免費用 14 天';
+
+  @override
+  String get trialIntroDuration => '接下來 14 天,所有功能都可以用,開始試用不用付錢。';
+
+  @override
+  String get trialIntroAfter =>
+      '試用結束後,沒有解鎖就不能再開新的 SSH 連線。主機、金鑰、Vaults 和同步都會留著,照樣可以看、可以改。';
+
+  @override
+  String trialIntroPrice(String price) {
+    return '解鎖只要買一次:$price,之後的 1.x 更新都包含在內。沒有訂閱,試用結束也不會自動扣款。';
+  }
+
+  @override
+  String get trialEndedTitle => '試用期結束了';
+
+  @override
+  String trialEndedBody(String price) {
+    return '想繼續開新的連線,解鎖一次就好:$price,之後的 1.x 更新都包含在內。';
+  }
+
+  @override
+  String get trialEndedKeepData => '謝謝你試用 tterminal。不管有沒有解鎖,主機、金鑰和同步都還在,照常可以用。';
+
+  @override
+  String get unlockTitle => '解鎖 tterminal';
+
+  @override
+  String unlockBody(String price) {
+    return '一次性購買 $price,之後的 1.x 更新都包含在內,沒有訂閱。';
+  }
+
+  @override
+  String unlockTrialLeft(int days) {
+    return '試用還有 $days 天。';
+  }
+
+  @override
+  String get priceLoading => '正在向 App Store 讀取價格…';
+
+  @override
+  String get priceUnavailable => '暫時連不上 App Store,讀不到價格。請確認網路後再試一次。';
+
+  @override
+  String get trialStarted => '試用開始了,接下來 14 天所有功能都能用。';
+
+  @override
+  String get unlockedThanks => '解鎖完成,謝謝支持!';
+
+  @override
+  String get purchasePending => '購買正在等候核准,核准後就會自動解鎖。';
+
+  @override
+  String purchaseFailed(String error) {
+    return '購買沒有完成:$error';
+  }
+
+  @override
+  String get restoreFoundUnlock => '已恢復購買,tterminal 解鎖了。';
+
+  @override
+  String get restoreNothing => '這個 Apple 帳號沒有解鎖的購買紀錄。';
+
+  @override
+  String restoreFailed(String error) {
+    return '恢復購買失敗:$error';
+  }
+
+  @override
+  String get storeItemUnavailable => 'App Store 目前找不到這個品項。';
+
+  @override
+  String get storeUnverified => 'App Store 無法驗證這筆購買。';
 }

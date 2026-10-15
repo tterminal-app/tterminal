@@ -1,0 +1,74 @@
+{
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
+  "identifier" : "7E4A1C02",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "0.0",
+      "familyShareable" : false,
+      "internalID" : "6740000001",
+      "localizations" : [
+        {
+          "description" : "Try every feature free for 14 days.",
+          "displayName" : "14-day Trial",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "所有功能免費試用 14 天。",
+          "displayName" : "14 天試用",
+          "locale" : "zh_TW"
+        }
+      ],
+      "productID" : "dev.tterm.ttermApp.trial14",
+      "referenceName" : "14-day Trial",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "14.99",
+      "familyShareable" : false,
+      "internalID" : "6740000002",
+      "localizations" : [
+        {
+          "description" : "One-time unlock, includes all 1.x updates.",
+          "displayName" : "Unlock tterminal",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "一次買斷,包含之後所有 1.x 更新。",
+          "displayName" : "解鎖 tterminal",
+          "locale" : "zh_TW"
+        }
+      ],
+      "productID" : "dev.tterm.ttermApp.unlock",
+      "referenceName" : "Unlock tterminal",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

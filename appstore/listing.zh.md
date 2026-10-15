@@ -62,17 +62,18 @@ terminal,tmux,vim,linux,遠端連線,伺服器,主機,金鑰,shell,命令列,注
 - 技術支援網址:https://tterminal-app.github.io/tterminal-sync/
 - 英文技術支援網址:https://tterminal-app.github.io/tterminal-sync/en/
 - 隱私權政策網址:https://tterminal-app.github.io/tterminal-sync/privacy.html
-- 價格:App 免費;內購兩項(都要先完成付費 App 協議):
+- 價格:App 免費;內購兩項(都要先完成付費 App 協議,每個欄位怎麼填見 [iap.md](iap.md)):
   - `14-day Trial`:非消耗型,US$0(審查準則 3.1.1 規定的試用做法)
   - `Unlock tterminal`:非消耗型,US$14.99 / NT$490(基準地區設美國,確認台灣區換算是 NT$490)
 - 銷售範圍:先不上法國(加密申報)、中國大陸(ICP 備案);歐盟其他國家要先處理 DSA trader 資料(地址電話會公開)
 
 ## 給審查人員的備註(App Review Information)
 
-審查人員要能真的連上一台 SSH 主機才測得了。請在備註裡提供一台示範主機,例如在你的 VPS 上跑一個 `lscr.io/linuxserver/openssh-server` 容器,開一組只給審查用的帳號:
+審查人員要能真的連上一台 SSH 主機才測得了。請在備註裡提供一台示範主機,例如在你的 VPS 上跑一個 `lscr.io/linuxserver/openssh-server` 容器,開一組只給審查用的帳號。內購的設定與兩個品項各自的審查備註見 [iap.md](iap.md)。審查備註是整個 App 共用一份(不分語言),英文版商店資料那邊不用另外填。
 
-> tterminal is an SSH client. To try it, tap the server icon (top right) → Add Host and enter:
+> tterminal is an SSH client. On first launch it explains the free trial (how long it lasts, what stops working afterwards and the unlock price). Tap "Start 14-day trial" and confirm the $0 purchase. This is the "14-day Trial" non-consumable (dev.tterm.ttermApp.trial14), following guideline 3.1.1.
+> To connect, tap the server icon (top right) → Add Host and enter:
 > Address: <示範主機位址>  Port: <埠>  Username: <帳號>  Password: <密碼>
-> Then go back and tap the host to connect.
-> The app is free to download with a 14-day free trial (a $0 non-consumable "14-day Trial" IAP, per guideline 3.1.1) and a one-time "Unlock tterminal" IAP. Both are offered on first launch and in Settings, along with Restore Purchases.
+> Then go back and tap the host.
+> Everything works during the trial. The one-time "Unlock tterminal" purchase (dev.tterm.ttermApp.unlock) is in Settings → Trial & unlock → Unlock, next to Restore purchases. If the trial ends without an unlock, hosts, keys, Vaults, Settings and sync keep working; only opening a new SSH connection shows the unlock screen.
 > Sync is optional and requires the user's own self-hosted server (open source: https://github.com/tterminal-app/tterminal-sync), so it isn't needed for review.

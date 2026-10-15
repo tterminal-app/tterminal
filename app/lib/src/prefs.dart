@@ -52,6 +52,7 @@ class AppPrefs extends ChangeNotifier {
         }
         _filePaneVisible = json['filePaneVisible'] == true;
         _connectionListCollapsed = json['connectionListCollapsed'] == true;
+        _trialIntroSeen = json['trialIntroSeen'] == true;
         final fs = (json['termFontSize'] as num?)?.toDouble();
         if (fs != null) {
           _termFontSize = fs.clamp(kTermFontMinSize, kTermFontMaxSize);
@@ -69,6 +70,7 @@ class AppPrefs extends ChangeNotifier {
   double _editorPaneWidth = kEditorPaneDefaultWidth;
   bool _filePaneVisible = false;
   bool _connectionListCollapsed = false;
+  bool _trialIntroSeen = false;
   double _termFontSize = kTermFontDefaultSize;
 
   TabBarPosition get tabBarPosition => _tabBarPosition;
@@ -79,6 +81,9 @@ class AppPrefs extends ChangeNotifier {
 
   /// 手機/平板寬螢幕終端頁的左側連線列收起來了(iPhone Duo 內螢幕攤平、iPad)。
   bool get connectionListCollapsed => _connectionListCollapsed;
+
+  /// iOS 第一次開 app 自動跳出的試用說明已經看過了(之後只在開連線時才跳)。
+  bool get trialIntroSeen => _trialIntroSeen;
   double get termFontSize => _termFontSize;
 
   set tabBarPosition(TabBarPosition value) {
@@ -126,6 +131,13 @@ class AppPrefs extends ChangeNotifier {
     notifyListeners();
   }
 
+  set trialIntroSeen(bool value) {
+    if (value == _trialIntroSeen) return;
+    _trialIntroSeen = value;
+    _save();
+    notifyListeners();
+  }
+
   set termFontSize(double value) {
     final clamped = value.clamp(kTermFontMinSize, kTermFontMaxSize);
     if (clamped == _termFontSize) return;
@@ -145,6 +157,7 @@ class AppPrefs extends ChangeNotifier {
         'editorPaneWidth': _editorPaneWidth,
         'filePaneVisible': _filePaneVisible,
         'connectionListCollapsed': _connectionListCollapsed,
+        'trialIntroSeen': _trialIntroSeen,
         'termFontSize': _termFontSize,
       }));
     } catch (_) {

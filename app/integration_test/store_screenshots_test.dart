@@ -19,6 +19,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:tterm_app/main.dart';
 import 'package:tterm_app/src/app_dirs.dart';
 import 'package:tterm_app/src/fold.dart';
+import 'package:tterm_app/src/purchases.dart';
 import 'package:tterm_app/src/terminal_view.dart';
 import 'package:tterm_app/src/vault_service.dart';
 
@@ -53,7 +54,10 @@ void main() {
       ]);
     }
     FoldBridge.start();
-    await tester.pumpWidget(const TtermApp(demoMode: false));
+    // 固定成「已解鎖」:模擬器上沒有 StoreKit 設定檔,截圖也不能出現試用說明或解鎖畫面
+    await tester.pumpWidget(
+      TtermApp(demoMode: false, purchases: FakePurchaseService.unlocked()),
+    );
     await _pause(tester, 1500);
 
     // 連上示範主機

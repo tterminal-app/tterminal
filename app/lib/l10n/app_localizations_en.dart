@@ -804,4 +804,155 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errDecryptFailed =>
       'Couldn\'t decrypt the data (wrong key, or it\'s been tampered with).';
+
+  @override
+  String get purchaseSection => 'Trial & unlock';
+
+  @override
+  String get accessLoading => 'Checking your purchase…';
+
+  @override
+  String get accessNotStarted => 'Trial not started';
+
+  @override
+  String get accessNotStartedHint =>
+      'Start it whenever you\'re ready. Every feature is free for 14 days.';
+
+  @override
+  String accessTrial(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Trial: $days days left',
+      one: 'Trial: 1 day left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String accessTrialHint(String date) {
+    return 'Everything is unlocked until $date.';
+  }
+
+  @override
+  String get accessExpired => 'Trial ended';
+
+  @override
+  String get accessExpiredHint =>
+      'Your hosts, keys and sync keep working. Opening new connections needs an unlock.';
+
+  @override
+  String get accessUnlocked => 'Unlocked';
+
+  @override
+  String get accessUnlockedHint =>
+      'Thanks for your support! All future 1.x updates are included.';
+
+  @override
+  String get startTrialButton => 'Start 14-day trial';
+
+  @override
+  String get unlockButton => 'Unlock';
+
+  @override
+  String unlockWithPrice(String price) {
+    return 'Unlock for $price';
+  }
+
+  @override
+  String get restorePurchases => 'Restore purchases';
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get trialIntroTitle => 'Try tterminal free for 14 days';
+
+  @override
+  String get trialIntroDuration =>
+      'Every feature works for the next 14 days, and starting the trial costs nothing.';
+
+  @override
+  String get trialIntroAfter =>
+      'After the trial, you\'ll need to unlock tterminal to open new SSH connections. Your hosts, keys, Vaults and sync stay put, and you can still view and edit them.';
+
+  @override
+  String trialIntroPrice(String price) {
+    return 'Unlocking is a one-time purchase of $price and includes all future 1.x updates. There\'s no subscription, and nothing is charged when the trial ends.';
+  }
+
+  @override
+  String get trialEndedTitle => 'Your trial has ended';
+
+  @override
+  String trialEndedBody(String price) {
+    return 'To keep opening new connections, unlock tterminal once for $price. That covers all future 1.x updates.';
+  }
+
+  @override
+  String get trialEndedKeepData =>
+      'Thanks for giving tterminal a try. Your hosts, keys and sync are all still here and keep working either way.';
+
+  @override
+  String get unlockTitle => 'Unlock tterminal';
+
+  @override
+  String unlockBody(String price) {
+    return 'A one-time purchase of $price, including all future 1.x updates. No subscription.';
+  }
+
+  @override
+  String unlockTrialLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'Your trial has $days days left.',
+      one: 'Your trial has 1 day left.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get priceLoading => 'Getting the price from the App Store…';
+
+  @override
+  String get priceUnavailable =>
+      'Couldn\'t reach the App Store to get the price. Check your connection and try again.';
+
+  @override
+  String get trialStarted => 'Your 14-day trial has started. Enjoy!';
+
+  @override
+  String get unlockedThanks => 'tterminal is unlocked. Thank you!';
+
+  @override
+  String get purchasePending =>
+      'Your purchase is waiting for approval. tterminal will unlock as soon as it goes through.';
+
+  @override
+  String purchaseFailed(String error) {
+    return 'The purchase didn\'t go through: $error';
+  }
+
+  @override
+  String get restoreFoundUnlock => 'Purchase restored. tterminal is unlocked.';
+
+  @override
+  String get restoreNothing =>
+      'No unlock purchase found for this Apple Account.';
+
+  @override
+  String restoreFailed(String error) {
+    return 'Couldn\'t restore purchases: $error';
+  }
+
+  @override
+  String get storeItemUnavailable =>
+      'This item isn\'t available in the App Store right now.';
+
+  @override
+  String get storeUnverified => 'The App Store couldn\'t verify this purchase.';
 }

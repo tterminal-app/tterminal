@@ -19,6 +19,7 @@
 		AC71B17E000000000000B011 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AC71B17E000000000000F013 /* Localizable.xcstrings */; };
 		AC71B17E000000000000B002 /* BackgroundBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC71B17E000000000000F002 /* BackgroundBridge.swift */; };
 		AC71B17E000000000000B007 /* FoldBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC71B17E000000000000F007 /* FoldBridge.swift */; };
+		5704EB1D0000000000000B01 /* StoreBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5704EB1D0000000000000F01 /* StoreBridge.swift */; };
 		AC71B17E000000000000B003 /* TtermActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC71B17E000000000000F003 /* TtermActivityAttributes.swift */; };
 		AC71B17E000000000000B004 /* TtermActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC71B17E000000000000F003 /* TtermActivityAttributes.swift */; };
 		AC71B17E000000000000B005 /* TtermActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC71B17E000000000000F004 /* TtermActivityBundle.swift */; };
@@ -90,6 +91,8 @@
 		AC71B17E000000000000F013 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		AC71B17E000000000000F002 /* BackgroundBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundBridge.swift; sourceTree = "<group>"; };
 		AC71B17E000000000000F007 /* FoldBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FoldBridge.swift; sourceTree = "<group>"; };
+		5704EB1D0000000000000F01 /* StoreBridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoreBridge.swift; sourceTree = "<group>"; };
+		5704EB1D0000000000000F02 /* tterminal.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = tterminal.storekit; sourceTree = "<group>"; };
 		AC71B17E000000000000F003 /* TtermActivityAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TtermActivityAttributes.swift; sourceTree = "<group>"; };
 		AC71B17E000000000000F004 /* TtermActivityBundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TtermActivityBundle.swift; sourceTree = "<group>"; };
 		AC71B17E000000000000F005 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -172,6 +175,8 @@
 				AC71B17E000000000000F001 /* SceneDelegate.swift */,
 				AC71B17E000000000000F002 /* BackgroundBridge.swift */,
 				AC71B17E000000000000F007 /* FoldBridge.swift */,
+				5704EB1D0000000000000F01 /* StoreBridge.swift */,
+				5704EB1D0000000000000F02 /* tterminal.storekit */,
 				AC71B17E000000000000F003 /* TtermActivityAttributes.swift */,
 				AC71B17E000000000000F010 /* InfoPlist.strings */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
@@ -380,6 +385,7 @@
 				AC71B17E000000000000B001 /* SceneDelegate.swift in Sources */,
 				AC71B17E000000000000B002 /* BackgroundBridge.swift in Sources */,
 				AC71B17E000000000000B007 /* FoldBridge.swift in Sources */,
+				5704EB1D0000000000000B01 /* StoreBridge.swift in Sources */,
 				AC71B17E000000000000B003 /* TtermActivityAttributes.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);

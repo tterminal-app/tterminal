@@ -1333,6 +1333,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t decrypt the data (wrong key, or it\'s been tampered with).'**
   String get errDecryptFailed;
+
+  /// No description provided for @purchaseSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial & unlock'**
+  String get purchaseSection;
+
+  /// No description provided for @accessLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your purchase…'**
+  String get accessLoading;
+
+  /// No description provided for @accessNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial not started'**
+  String get accessNotStarted;
+
+  /// No description provided for @accessNotStartedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Start it whenever you\'re ready. Every feature is free for 14 days.'**
+  String get accessNotStartedHint;
+
+  /// No description provided for @accessTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Trial: 1 day left} other{Trial: {days} days left}}'**
+  String accessTrial(int days);
+
+  /// date is the trial end date, already formatted for the locale.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is unlocked until {date}.'**
+  String accessTrialHint(String date);
+
+  /// No description provided for @accessExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial ended'**
+  String get accessExpired;
+
+  /// No description provided for @accessExpiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your hosts, keys and sync keep working. Opening new connections needs an unlock.'**
+  String get accessExpiredHint;
+
+  /// No description provided for @accessUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get accessUnlocked;
+
+  /// No description provided for @accessUnlockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your support! All future 1.x updates are included.'**
+  String get accessUnlockedHint;
+
+  /// No description provided for @startTrialButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Start 14-day trial'**
+  String get startTrialButton;
+
+  /// No description provided for @unlockButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlockButton;
+
+  /// price is the localized App Store price string, e.g. $14.99.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock for {price}'**
+  String unlockWithPrice(String price);
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get restorePurchases;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// No description provided for @trialIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try tterminal free for 14 days'**
+  String get trialIntroTitle;
+
+  /// No description provided for @trialIntroDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Every feature works for the next 14 days, and starting the trial costs nothing.'**
+  String get trialIntroDuration;
+
+  /// No description provided for @trialIntroAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After the trial, you\'ll need to unlock tterminal to open new SSH connections. Your hosts, keys, Vaults and sync stay put, and you can still view and edit them.'**
+  String get trialIntroAfter;
+
+  /// Shown before the trial starts (App Review guideline 3.1.1). price is the localized App Store price.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocking is a one-time purchase of {price} and includes all future 1.x updates. There\'s no subscription, and nothing is charged when the trial ends.'**
+  String trialIntroPrice(String price);
+
+  /// No description provided for @trialEndedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trial has ended'**
+  String get trialEndedTitle;
+
+  /// No description provided for @trialEndedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'To keep opening new connections, unlock tterminal once for {price}. That covers all future 1.x updates.'**
+  String trialEndedBody(String price);
+
+  /// No description provided for @trialEndedKeepData.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for giving tterminal a try. Your hosts, keys and sync are all still here and keep working either way.'**
+  String get trialEndedKeepData;
+
+  /// No description provided for @unlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock tterminal'**
+  String get unlockTitle;
+
+  /// No description provided for @unlockBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A one-time purchase of {price}, including all future 1.x updates. No subscription.'**
+  String unlockBody(String price);
+
+  /// No description provided for @unlockTrialLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{Your trial has 1 day left.} other{Your trial has {days} days left.}}'**
+  String unlockTrialLeft(int days);
+
+  /// No description provided for @priceLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting the price from the App Store…'**
+  String get priceLoading;
+
+  /// No description provided for @priceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the App Store to get the price. Check your connection and try again.'**
+  String get priceUnavailable;
+
+  /// No description provided for @trialStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your 14-day trial has started. Enjoy!'**
+  String get trialStarted;
+
+  /// No description provided for @unlockedThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'tterminal is unlocked. Thank you!'**
+  String get unlockedThanks;
+
+  /// No description provided for @purchasePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Your purchase is waiting for approval. tterminal will unlock as soon as it goes through.'**
+  String get purchasePending;
+
+  /// No description provided for @purchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The purchase didn\'t go through: {error}'**
+  String purchaseFailed(String error);
+
+  /// No description provided for @restoreFoundUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase restored. tterminal is unlocked.'**
+  String get restoreFoundUnlock;
+
+  /// No description provided for @restoreNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No unlock purchase found for this Apple Account.'**
+  String get restoreNothing;
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t restore purchases: {error}'**
+  String restoreFailed(String error);
+
+  /// No description provided for @storeItemUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This item isn\'t available in the App Store right now.'**
+  String get storeItemUnavailable;
+
+  /// No description provided for @storeUnverified.
+  ///
+  /// In en, this message translates to:
+  /// **'The App Store couldn\'t verify this purchase.'**
+  String get storeUnverified;
 }
 
 class _AppLocalizationsDelegate

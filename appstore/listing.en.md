@@ -55,4 +55,4 @@ First release.
 
 ## Review notes
 
-See listing.zh.md — the reviewer needs a reachable demo SSH host.
+App Review notes are one field for the whole app, not per language, so there's only one copy: the English note in listing.zh.md. It covers the demo SSH host the reviewer needs, starting the free trial on first launch ("Start 14-day trial", the $0 "14-day Trial" IAP), and where to find "Unlock tterminal" and Restore purchases (Settings → Trial & unlock). The per-IAP review notes are in iap.md.

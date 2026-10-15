@@ -370,5 +370,75 @@
     "placeholders": {"version": {"type": "int"}}
   },
   "errPairingMalformed": "This pairing string is incomplete or damaged. Try copying it again.",
-  "errDecryptFailed": "Couldn't decrypt the data (wrong key, or it's been tampered with)."
+  "errDecryptFailed": "Couldn't decrypt the data (wrong key, or it's been tampered with).",
+
+  "purchaseSection": "Trial & unlock",
+  "accessLoading": "Checking your purchase…",
+  "accessNotStarted": "Trial not started",
+  "accessNotStartedHint": "Start it whenever you're ready. Every feature is free for 14 days.",
+  "accessTrial": "{days, plural, =1{Trial: 1 day left} other{Trial: {days} days left}}",
+  "@accessTrial": {
+    "placeholders": {"days": {"type": "int"}}
+  },
+  "accessTrialHint": "Everything is unlocked until {date}.",
+  "@accessTrialHint": {
+    "description": "date is the trial end date, already formatted for the locale.",
+    "placeholders": {"date": {"type": "String"}}
+  },
+  "accessExpired": "Trial ended",
+  "accessExpiredHint": "Your hosts, keys and sync keep working. Opening new connections needs an unlock.",
+  "accessUnlocked": "Unlocked",
+  "accessUnlockedHint": "Thanks for your support! All future 1.x updates are included.",
+  "startTrialButton": "Start 14-day trial",
+  "unlockButton": "Unlock",
+  "unlockWithPrice": "Unlock for {price}",
+  "@unlockWithPrice": {
+    "description": "price is the localized App Store price string, e.g. $14.99.",
+    "placeholders": {"price": {"type": "String"}}
+  },
+  "restorePurchases": "Restore purchases",
+  "notNow": "Not now",
+  "tryAgain": "Try again",
+
+  "trialIntroTitle": "Try tterminal free for 14 days",
+  "trialIntroDuration": "Every feature works for the next 14 days, and starting the trial costs nothing.",
+  "trialIntroAfter": "After the trial, you'll need to unlock tterminal to open new SSH connections. Your hosts, keys, Vaults and sync stay put, and you can still view and edit them.",
+  "trialIntroPrice": "Unlocking is a one-time purchase of {price} and includes all future 1.x updates. There's no subscription, and nothing is charged when the trial ends.",
+  "@trialIntroPrice": {
+    "description": "Shown before the trial starts (App Review guideline 3.1.1). price is the localized App Store price.",
+    "placeholders": {"price": {"type": "String"}}
+  },
+  "trialEndedTitle": "Your trial has ended",
+  "trialEndedBody": "To keep opening new connections, unlock tterminal once for {price}. That covers all future 1.x updates.",
+  "@trialEndedBody": {
+    "placeholders": {"price": {"type": "String"}}
+  },
+  "trialEndedKeepData": "Thanks for giving tterminal a try. Your hosts, keys and sync are all still here and keep working either way.",
+  "unlockTitle": "Unlock tterminal",
+  "unlockBody": "A one-time purchase of {price}, including all future 1.x updates. No subscription.",
+  "@unlockBody": {
+    "placeholders": {"price": {"type": "String"}}
+  },
+  "unlockTrialLeft": "{days, plural, =1{Your trial has 1 day left.} other{Your trial has {days} days left.}}",
+  "@unlockTrialLeft": {
+    "placeholders": {"days": {"type": "int"}}
+  },
+  "priceLoading": "Getting the price from the App Store…",
+  "priceUnavailable": "Couldn't reach the App Store to get the price. Check your connection and try again.",
+
+  "trialStarted": "Your 14-day trial has started. Enjoy!",
+  "unlockedThanks": "tterminal is unlocked. Thank you!",
+  "purchasePending": "Your purchase is waiting for approval. tterminal will unlock as soon as it goes through.",
+  "purchaseFailed": "The purchase didn't go through: {error}",
+  "@purchaseFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "restoreFoundUnlock": "Purchase restored. tterminal is unlocked.",
+  "restoreNothing": "No unlock purchase found for this Apple Account.",
+  "restoreFailed": "Couldn't restore purchases: {error}",
+  "@restoreFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "storeItemUnavailable": "This item isn't available in the App Store right now.",
+  "storeUnverified": "The App Store couldn't verify this purchase."
 }

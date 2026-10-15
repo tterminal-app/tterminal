@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 
 /// 自訂 scene delegate:掛上背景保活橋接(連線數 channel + 背景任務 +
-/// Live Activity)與 iPhone Duo 摺痕橋接。其餘生命週期全部交給
+/// Live Activity)、iPhone Duo 摺痕橋接與內購橋接。其餘生命週期全部交給
 /// FlutterSceneDelegate。
 class SceneDelegate: FlutterSceneDelegate {
   override func scene(
@@ -14,6 +14,7 @@ class SceneDelegate: FlutterSceneDelegate {
     if let controller = window?.rootViewController as? FlutterViewController {
       BackgroundBridge.shared.attach(messenger: controller.binaryMessenger)
       FoldBridge.shared.attach(messenger: controller.binaryMessenger)
+      StoreBridge.shared.attach(messenger: controller.binaryMessenger, scene: scene)
     }
   }
 

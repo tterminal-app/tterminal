@@ -15,6 +15,7 @@ import 'src/fold.dart';
 import 'src/l10n.dart';
 import 'src/mobile_shell.dart';
 import 'src/prefs.dart';
+import 'src/purchases.dart';
 import 'src/tabs.dart';
 import 'src/vault_service.dart';
 
@@ -25,10 +26,14 @@ void main() {
 }
 
 class TtermApp extends StatefulWidget {
-  const TtermApp({super.key, this.demoMode});
+  const TtermApp({super.key, this.demoMode, this.purchases});
 
   /// null = 依環境變數決定。
   final bool? demoMode;
+
+  /// 試用 / 解鎖狀態;null = 依平台(iOS 接 StoreKit,其他平台不收費)。
+  /// 商店截圖傳 [FakePurchaseService.unlocked],畫面上不會出現解鎖畫面。
+  final PurchaseService? purchases;
 
   @override
   State<TtermApp> createState() => _TtermAppState();
@@ -72,14 +77,17 @@ class _TtermAppState extends State<TtermApp> with WidgetsBindingObserver {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       // 折疊螢幕的摺痕(iOS 由 native 量)→ MediaQuery.displayFeatures
       builder: (context, child) => FoldFeatures(child: child!),
-      home: demo ? const DemoPage() : const ShellRoot(),
+      home: demo ? const DemoPage() : ShellRoot(purchases: widget.purchases),
     );
   }
 }
 
-/// 建立長生命週期的服務(prefs / vault / tabs)並掛上 AppShell。
+/// 建立長生命週期的服務(prefs / vault / tabs / 購買狀態)並掛上 AppShell。
 class ShellRoot extends StatefulWidget {
-  const ShellRoot({super.key});
+  const ShellRoot({super.key, this.purchases});
+
+  /// null = 依平台建立(見 [createPlatformPurchaseService])。
+  final PurchaseService? purchases;
 
   @override
   State<ShellRoot> createState() => _ShellRootState();
@@ -90,6 +98,10 @@ class _ShellRootState extends State<ShellRoot> {
   late final TabsController _tabs;
   VaultService? _vault;
   String? _vaultError;
+  PurchaseService? _purchases;
+
+  /// [_purchases] 是這裡建的(要負責 dispose)。
+  bool _ownsPurchases = false;
 
   /// 手機用獨立的 connection list 畫面流(Termius 式),桌面用分頁工作區。
   static final bool _mobile = Platform.isIOS || Platform.isAndroid;
@@ -112,10 +124,16 @@ class _ShellRootState extends State<ShellRoot> {
       _vaultError = '$e';
     }
     _tabs = TabsController(refillOnEmpty: !_mobile);
+    _purchases = widget.purchases;
+    if (_purchases == null && _mobile) {
+      _purchases = createPlatformPurchaseService();
+      _ownsPurchases = _purchases != null;
+    }
   }
 
   @override
   void dispose() {
+    if (_ownsPurchases) _purchases?.dispose();
     _tabs.dispose();
     _vault?.dispose();
     super.dispose();
@@ -129,6 +147,7 @@ class _ShellRootState extends State<ShellRoot> {
         prefs: _prefs,
         vault: _vault,
         vaultError: _vaultError,
+        purchases: _purchases,
       );
     }
     return AppShell(

@@ -1,4 +1,5 @@
-// 設定頁:分頁列位置 + 同步(建立/配對匯入匯出/立即同步/停用)。
+// 設定頁:分頁列位置 + 同步(建立/配對匯入匯出/立即同步/停用)
+// + 試用與解鎖(只有 iOS 有)。
 
 import 'dart:io';
 
@@ -7,6 +8,8 @@ import 'package:flutter/services.dart';
 
 import 'l10n.dart';
 import 'prefs.dart';
+import 'purchases.dart';
+import 'unlock_page.dart';
 import 'vault_service.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -15,11 +18,15 @@ class SettingsPage extends StatefulWidget {
     required this.service,
     required this.prefs,
     this.vaultError,
+    this.purchases,
   });
 
   final VaultService? service;
   final AppPrefs prefs;
   final String? vaultError;
+
+  /// null = 這個平台不收費,不顯示「試用與解鎖」。
+  final PurchaseService? purchases;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -100,6 +107,11 @@ class _SettingsPageState extends State<SettingsPage> {
               listenable: widget.service!,
               builder: (context, _) => _syncSection(widget.service!),
             ),
+          if (widget.purchases case final purchases?) ...[
+            const Divider(height: 32),
+            _sectionTitle(context, l10n.purchaseSection),
+            PurchaseSection(service: purchases),
+          ],
         ],
       ),
     );

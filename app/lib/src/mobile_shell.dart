@@ -8,6 +8,9 @@
 //
 // 本地 shell 在手機上不存在(iOS 禁 fork/exec),所以沒有「空白終端分頁」。
 //
+// iOS 版收費(purchases.dart):第一次開 app 先跳試用說明;試用到期又沒解鎖時,
+// 只有開新連線會跳解鎖畫面,主機列表、Vaults、設定、同步都照常可用。
+//
 // 大螢幕與折疊螢幕(iPhone Duo 內螢幕、iPad、Android foldable)改成兩欄:
 // 左邊連線列、右邊終端(首頁右邊是提示)。書本式半開時以摺痕為界,
 // 桌上型半開時終端在上半、操作區與鍵盤在下半(見 fold.dart)。
@@ -19,11 +22,13 @@ import 'fold.dart';
 import 'host_key_mismatch_view.dart';
 import 'l10n.dart';
 import 'prefs.dart';
+import 'purchases.dart';
 import 'settings_page.dart';
 import 'ssh_connect.dart';
 import 'tabs.dart';
 import 'term_painter.dart';
 import 'terminal_view.dart';
+import 'unlock_page.dart';
 import 'vault_pages.dart';
 import 'vault_service.dart';
 
@@ -34,12 +39,16 @@ class MobileShell extends StatefulWidget {
     required this.prefs,
     required this.vault,
     this.vaultError,
+    this.purchases,
   });
 
   final TabsController tabs;
   final AppPrefs prefs;
   final VaultService? vault;
   final String? vaultError;
+
+  /// 試用 / 解鎖狀態;null = 不收費(iOS 以外)。
+  final PurchaseService? purchases;
 
   @override
   State<MobileShell> createState() => _MobileShellState();
@@ -55,6 +64,19 @@ class _MobileShellState extends State<MobileShell> {
     super.initState();
     widget.tabs.addListener(_reportConnections);
     _reportConnections();
+    _showTrialIntroOnce();
+  }
+
+  /// 第一次開 app、還沒開始試用:自動跳一次試用說明(之後只在開連線時跳)。
+  Future<void> _showTrialIntroOnce() async {
+    final purchases = widget.purchases;
+    if (purchases == null || widget.prefs.trialIntroSeen) return;
+    await purchases.ready;
+    await WidgetsBinding.instance.endOfFrame; // Navigator 要先建好
+    if (!mounted || purchases.status.kind != AccessKind.notStarted) return;
+    if (widget.prefs.trialIntroSeen) return;
+    widget.prefs.trialIntroSeen = true;
+    await showUnlockPage(context, purchases);
   }
 
   @override
@@ -86,17 +108,22 @@ class _MobileShellState extends State<MobileShell> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// 開一條 SSH 連線,回傳新分頁 id(失敗 null,錯誤已提示)。
-  int? _connectTab(VaultRecord host) => connectSshHostTab(
-    tabs: widget.tabs,
-    vault: widget.vault,
-    host: host,
-    onError: _showError,
-  );
+  /// 開一條 SSH 連線,回傳新分頁 id(失敗或還沒解鎖 null,錯誤已提示)。
+  Future<int?> _connectTab(VaultRecord host) async {
+    if (!await ensureCanConnect(context, widget.purchases) || !mounted) {
+      return null;
+    }
+    return connectSshHostTab(
+      tabs: widget.tabs,
+      vault: widget.vault,
+      host: host,
+      onError: _showError,
+    );
+  }
 
-  void _connect(VaultRecord host) {
-    final id = _connectTab(host);
-    if (id != null) _openTerminal(id);
+  Future<void> _connect(VaultRecord host) async {
+    final id = await _connectTab(host);
+    if (id != null && mounted) _openTerminal(id);
   }
 
   void _openTerminal(int tabId) {
@@ -135,9 +162,14 @@ class _MobileShellState extends State<MobileShell> {
       MaterialPageRoute<void>(
         builder: (_) => VaultsPage(
           service: vault,
-          onConnectHost: (host) {
+          onConnectHost: (host) async {
+            // 還沒解鎖:解鎖畫面疊在 Vaults 上,關掉後留在 Vaults
+            if (!await ensureCanConnect(context, widget.purchases) ||
+                !mounted) {
+              return;
+            }
             Navigator.of(context).pop();
-            _connect(host);
+            await _connect(host);
           },
         ),
       ),
@@ -151,6 +183,7 @@ class _MobileShellState extends State<MobileShell> {
           service: widget.vault,
           prefs: widget.prefs,
           vaultError: widget.vaultError,
+          purchases: widget.purchases,
         ),
       ),
     );
@@ -499,8 +532,8 @@ class _MobileTerminalPage extends StatefulWidget {
   final GlobalKey<TerminalViewState> Function(int tabId) viewKeyFor;
   final void Function(int steps) onFontZoom;
 
-  /// 回傳新分頁 id(失敗 null,錯誤已提示)。
-  final int? Function(VaultRecord host) onConnectHost;
+  /// 回傳新分頁 id(失敗或還沒解鎖 null,錯誤已提示)。
+  final Future<int?> Function(VaultRecord host) onConnectHost;
   final void Function(int tabId) onDisconnect;
 
   @override
@@ -527,9 +560,9 @@ class _MobileTerminalPageState extends State<_MobileTerminalPage> {
     if (tabId != _tabId) setState(() => _tabId = tabId);
   }
 
-  void _connect(VaultRecord host) {
-    final id = widget.onConnectHost(host);
-    if (id != null) _select(id);
+  Future<void> _connect(VaultRecord host) async {
+    final id = await widget.onConnectHost(host);
+    if (id != null && mounted) _select(id);
   }
 
   /// 目前的連線不見了(斷線鈕、左欄的 ×、從別處關掉):兩欄且還有別的連線
