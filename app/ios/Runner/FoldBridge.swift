@@ -7,7 +7,9 @@ import UIKit
 /// iOS 27.1 的 reserved regions:
 ///   * `.division`:半開時切開內螢幕的摺痕帶 → `fold`。攤平時 inactive,
 ///     Apple 要求當一整塊螢幕用,所以不回報
-///   * `.occlusion`:螢幕下鏡頭啟用時的遮擋區 → `cutout`
+///   * `.occlusion`:被系統元件蓋住的區域 → `cutout`。外螢幕右上的時間/Wi‑Fi
+///     膠囊(382,0 84×170)與螢幕下鏡頭都在這裡;膠囊 iOS 另外算進
+///     safeAreaInsets.right,貼邊的 cutout 由 Dart 端在根部整條讓掉
 /// 座標取 FlutterView 自己的 point,剛好就是 Flutter 的邏輯像素。
 ///
 /// reserved regions 沒有變更通知;UIKit 在它變動時會重跑 layout,所以每次

@@ -9,12 +9,17 @@
 //
 // 摺痕只在「半開」時算數:攤平時 Apple 要求整塊當一張螢幕用,native 也不回報;
 // Android 攤平的 fold 是零寬線 + postureFlat,這裡同樣忽略。
+//
+// 同一條管道也帶 cutout(iOS 的 occlusion region);貼著左/右邊的(Duo 外螢幕
+// 的系統膠囊)由 FoldFeatures 在根部整條讓掉,見下方說明。
 
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:math' as math;
 import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType;
 
 import 'package:flutter/foundation.dart' show listEquals, visibleForTesting;
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -91,14 +96,28 @@ class FoldBridge {
   }
 }
 
-/// 把 [FoldBridge] 的摺痕疊進 MediaQuery(掛在 MaterialApp.builder)。
+/// 把 [FoldBridge] 的摺痕疊進 MediaQuery,並讓開貼邊的系統保留區
+/// (掛在 MaterialApp.builder)。
 ///
 /// 掛在 Navigator 之上,所以 showDialog / bottom sheet 內建的
 /// DisplayFeatureSubScreen 也會自動避開摺痕。
+///
+/// 貼邊保留區:iPhone Duo 外螢幕右上角是系統的時間/Wi‑Fi 膠囊(occlusion
+/// 382,0 84×170,貼頂也貼右),iOS 把它算成 safeAreaInsets.right 84。AppBar 與
+/// 包了 SafeArea 的頁面會讓,但多數頁面的 body 不理左右 inset(Vaults 的新增鈕
+/// 就被蓋掉),所以 cutout 貼著左/右邊時在這裡把那一側整條讓掉,各頁不用管。
+/// 一般 iPhone 的動態島/瀏海離邊緣還有一段,不會觸發。
+///
+/// 讓掉之後內層看到的是較窄的視窗:size 與那側 padding 扣掉、displayFeatures
+/// 平移到內層座標——摺痕分欄、DisplayFeatureSubScreen 都拿 size 和
+/// displayFeatures 在同一個座標系比。
 class FoldFeatures extends StatelessWidget {
   const FoldFeatures({super.key, required this.child});
 
   final Widget child;
+
+  /// cutout 離邊緣多近算貼邊(native 座標常是 1/3 pt 的小數)。
+  static const _edgeSlop = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -106,14 +125,72 @@ class FoldFeatures extends StatelessWidget {
       valueListenable: FoldBridge.features,
       child: child,
       builder: (context, features, child) {
-        final data = MediaQuery.of(context);
+        var data = MediaQuery.of(context);
         // 平台(Android,或未來的 Flutter iOS)已經提供 → 不重複疊加
-        if (features.isEmpty || data.displayFeatures.isNotEmpty) return child!;
-        return MediaQuery(
-          data: data.copyWith(displayFeatures: features),
-          child: child!,
+        if (features.isNotEmpty && data.displayFeatures.isEmpty) {
+          data = data.copyWith(displayFeatures: features);
+        }
+        final side = _sideReserve(data);
+        // 不論讓不讓都包同樣幾層,切換時 Navigator 以上的 element 不會換掉
+        return ColoredBox(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: Padding(
+            padding: side,
+            child: MediaQuery(data: _inset(data, side), child: child!),
+          ),
         );
       },
+    );
+  }
+
+  /// 貼著左/右邊的 cutout → 那一側要讓掉的寬度(cutout 與系統 padding 取大)。
+  static EdgeInsets _sideReserve(MediaQueryData data) {
+    final width = data.size.width;
+    var left = 0.0, right = 0.0;
+    for (final f in data.displayFeatures) {
+      if (f.type != DisplayFeatureType.cutout) continue;
+      final b = f.bounds;
+      // 橫跨大半寬的是頂/底的帶狀區,交給上下 padding
+      if (b.width * 2 >= width) continue;
+      if (b.left <= _edgeSlop) {
+        left = math.max(left, b.right);
+      } else if (b.right >= width - _edgeSlop) {
+        right = math.max(right, width - b.left);
+      }
+    }
+    return EdgeInsets.only(
+      left: left > 0 ? math.max(left, data.padding.left) : 0,
+      right: right > 0 ? math.max(right, data.padding.right) : 0,
+    );
+  }
+
+  /// 讓掉 [side] 之後,內層那個較窄視窗的 MediaQuery。
+  static MediaQueryData _inset(MediaQueryData data, EdgeInsets side) {
+    if (side == EdgeInsets.zero) return data;
+    final shift = Offset(-side.left, 0);
+    final inner =
+        Offset.zero &
+        Size(math.max(0, data.size.width - side.horizontal), data.size.height);
+    EdgeInsets less(EdgeInsets e) => e.copyWith(
+      left: math.max(0, e.left - side.left),
+      right: math.max(0, e.right - side.right),
+    );
+    return data.copyWith(
+      size: inner.size,
+      padding: less(data.padding),
+      viewPadding: less(data.viewPadding),
+      viewInsets: less(data.viewInsets),
+      systemGestureInsets: less(data.systemGestureInsets),
+      displayFeatures: [
+        for (final f in data.displayFeatures)
+          // 落在讓掉那條裡的(膠囊本身)內層用不到
+          if (f.bounds.shift(shift).overlaps(inner))
+            DisplayFeature(
+              bounds: f.bounds.shift(shift),
+              type: f.type,
+              state: f.state,
+            ),
+      ],
     );
   }
 }
