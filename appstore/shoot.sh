@@ -100,21 +100,20 @@ if [ -z "$udid" ]; then
     udid=$(xcrun simctl create "$name" "$devtype" "$runtime")
     echo "建立模擬器 $name($udid)"
 fi
-xcrun simctl boot "$udid" 2>/dev/null || true
-xcrun simctl bootstatus "$udid" -b >/dev/null
-# app 跟著系統語言;鍵盤沒另外設定時也跟著語言(繁中 → 注音)。語言有變才重開機
+# app 跟著系統語言;鍵盤沒另外設定時也跟著語言(繁中 → 注音)。
+# 趁還沒開機直接改模擬器的全域設定檔,開一次機就好:開機後再改要關機重開,
+# 機器忙的時候 simctl 很容易在重開那步逾時
 case "$locale" in
     en) want_lang=en-US; want_region=en_US ;;
     *)  want_lang=zh-Hant-TW; want_region=zh_TW ;;
 esac
-cur_lang=$(xcrun simctl spawn "$udid" defaults read -g AppleLanguages 2>/dev/null | tr -d ' ()"\n')
-if [ "$cur_lang" != "$want_lang" ]; then
-    xcrun simctl spawn "$udid" defaults write -g AppleLanguages -array "$want_lang"
-    xcrun simctl spawn "$udid" defaults write -g AppleLocale -string "$want_region"
-    xcrun simctl shutdown "$udid"
-    xcrun simctl boot "$udid"
-    xcrun simctl bootstatus "$udid" -b >/dev/null
-fi
+xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
+prefs="$HOME/Library/Developer/CoreSimulator/Devices/$udid/data/Library/Preferences/.GlobalPreferences.plist"
+mkdir -p "$(dirname "$prefs")"
+defaults write "$prefs" AppleLanguages -array "$want_lang"
+defaults write "$prefs" AppleLocale -string "$want_region"
+xcrun simctl boot "$udid"
+xcrun simctl bootstatus "$udid" -b >/dev/null
 xcrun simctl ui "$udid" appearance dark
 # 模擬器跟 Mac 共用剪貼簿,鍵盤建議列會秀出剪貼簿內容——先清掉
 printf '' | xcrun simctl pbcopy "$udid"
