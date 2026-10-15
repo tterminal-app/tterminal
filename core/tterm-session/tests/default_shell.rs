@@ -34,7 +34,13 @@ fn windows_default_shell_is_powershell() {
 #[test]
 fn default_shell_reports_cwd_via_osc7() {
     let session = Session::spawn_shell(100, 30, 1000, None).expect("spawn default shell");
-    let tmp = std::env::temp_dir().to_string_lossy().replace("\\\\?\\", "");
+    // TEMP 可能是 8.3 短檔名(GitHub runner 上是 C:\Users\RUNNER~1\...),
+    // PowerShell 回報的是完整路徑;canonicalize 展開成完整路徑再比
+    let tmp_dir = std::env::temp_dir();
+    let tmp = std::fs::canonicalize(&tmp_dir)
+        .unwrap_or(tmp_dir)
+        .to_string_lossy()
+        .replace("\\\\?\\", "");
     let want = tmp.replace('\\', "/").trim_end_matches('/').to_lowercase();
 
     // 提示符一畫出來就該有第一筆 OSC 7
