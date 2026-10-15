@@ -7,7 +7,8 @@
 # 絕不在平常開發用的模擬器上跑:flutter drive 跑完會解除安裝 app,
 # 那台模擬器上 tterminal 的資料會跟著消失;流程也會寫入示範主機。
 #
-# 環境變數:FONT=18 終端字級;SCREEN=3 截哪個螢幕(iPhone Duo 內螢幕,見 simctl io <udid> enumerate)
+# 環境變數:FONT=18 終端字級;SCREEN=3 截哪個螢幕(iPhone Duo 內螢幕,見 simctl io <udid> enumerate);
+#           KEEP_BOOTED=1 結束時不關模擬器(Duo 內螢幕要先在 DeviceHub 手動展開)
 #
 # 會先備好:
 #   * 示範 SSH 主機:docker 容器 tterm-demo(本機 127.0.0.1:22),tmux 場景見 demo-host/setup.sh
@@ -78,7 +79,8 @@ pids+=($!)
 cleanup() {
     [ ${#pids[@]} -eq 0 ] || kill "${pids[@]}" 2>/dev/null || true
     rm -rf "$ack"
-    [ -z "${udid:-}" ] || xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
+    # KEEP_BOOTED=1:不關(手動展開的 Duo 一關機就摺回去了)
+    [ -n "${KEEP_BOOTED:-}" ] || [ -z "${udid:-}" ] || xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
@@ -107,12 +109,28 @@ case "$locale" in
     en) want_lang=en-US; want_region=en_US ;;
     *)  want_lang=zh-Hant-TW; want_region=zh_TW ;;
 esac
-xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
 prefs="$HOME/Library/Developer/CoreSimulator/Devices/$udid/data/Library/Preferences/.GlobalPreferences.plist"
-mkdir -p "$(dirname "$prefs")"
-defaults write "$prefs" AppleLanguages -array "$want_lang"
-defaults write "$prefs" AppleLocale -string "$want_region"
-xcrun simctl boot "$udid"
+cur_lang=$(defaults read "$prefs" AppleLanguages 2>/dev/null | tr -d ' ()"\n' || true)
+booted=$(xcrun simctl list devices booted | grep -c "$udid" || true)
+if [ "$cur_lang" != "$want_lang" ] && [ -n "${KEEP_BOOTED:-}" ] && [ "$booted" -gt 0 ]; then
+    # 要保持開機(手動展開的 Duo):不重開機,直接改全域設定,app 重新啟動就會讀到;
+    # 鍵盤也明確指定,不然會沿用上一個語系的輸入法
+    case "$locale" in
+        en) want_kb="en_US@sw=QWERTY;hw=Automatic" ;;
+        *)  want_kb="zh_Hant-Zhuyin@sw=Zhuyin;hw=Automatic" ;;
+    esac
+    xcrun simctl spawn "$udid" defaults write -g AppleLanguages -array "$want_lang"
+    xcrun simctl spawn "$udid" defaults write -g AppleLocale -string "$want_region"
+    xcrun simctl spawn "$udid" defaults write -g AppleKeyboards -array "$want_kb"
+elif [ "$cur_lang" != "$want_lang" ]; then
+    # 語系不對才關機改設定;語系本來就對就不動,已經開著的模擬器(例如手動展開的
+    # Duo 內螢幕)可以保持原狀
+    xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
+    mkdir -p "$(dirname "$prefs")"
+    defaults write "$prefs" AppleLanguages -array "$want_lang"
+    defaults write "$prefs" AppleLocale -string "$want_region"
+fi
+xcrun simctl boot "$udid" 2>/dev/null || true
 xcrun simctl bootstatus "$udid" -b >/dev/null
 xcrun simctl ui "$udid" appearance dark
 # 模擬器跟 Mac 共用剪貼簿,鍵盤建議列會秀出剪貼簿內容——先清掉
