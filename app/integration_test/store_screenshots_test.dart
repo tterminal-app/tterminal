@@ -175,14 +175,40 @@ Future<void> _waitFor(WidgetTester tester, Finder finder) async {
 }
 
 /// [scene] 先請示範主機切畫面,等 tmux 重畫完再截。
+///
+/// 每一步都等 shoot.sh 確認做完才往下走:模擬器的日誌在機器忙的時候會晚好幾秒
+/// 才送到 shoot.sh,只靠固定延遲會拍到下一個畫面。
 Future<void> _shot(WidgetTester tester, String name, {String? scene}) async {
   if (scene != null) {
     // ignore: avoid_print
     print('TTERM_SCENE $scene');
-    await _pause(tester, 3000);
+    await _awaitAck(tester, 'scene-$scene');
+    await _pause(tester, 1500); // tmux 換視窗後的重畫
   }
   await _pause(tester, 800);
   // ignore: avoid_print
   print('TTERM_SHOT $name');
-  await _pause(tester, 2500);
+  await _awaitAck(tester, 'shot-$name');
+}
+
+/// 等 shoot.sh 在 127.0.0.1:8731 放好確認檔。
+Future<void> _awaitAck(WidgetTester tester, String key) async {
+  final client = HttpClient()..connectionTimeout = const Duration(seconds: 2);
+  try {
+    final deadline = DateTime.now().add(const Duration(minutes: 2));
+    while (DateTime.now().isBefore(deadline)) {
+      try {
+        final req = await client.getUrl(Uri.parse('http://127.0.0.1:8731/$key'));
+        final resp = await req.close();
+        await resp.drain<void>();
+        if (resp.statusCode == 200) return;
+      } on IOException {
+        // shoot.sh 的確認服務還沒起來,繼續等
+      }
+      await _pause(tester, 300);
+    }
+    throw StateError('等不到 shoot.sh 確認 $key');
+  } finally {
+    client.close(force: true);
+  }
 }

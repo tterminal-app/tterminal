@@ -14,7 +14,9 @@
 #   * homelab.local → 127.0.0.1(dns-sd 註冊 Bonjour 名稱,不動 /etc/hosts)
 #   * 同步伺服器:server/ 的 tterm-server 跑在 127.0.0.1:8722
 # 接著跑 integration_test/store_screenshots_test.dart,看到 TTERM_SCENE 就切 tmux 視窗、
-# 看到 TTERM_SHOT 就用 simctl 截圖。
+# 看到 TTERM_SHOT 就用 simctl 截圖。每做完一步就在 127.0.0.1:8731 放一個確認檔,
+# 測試等到確認才往下走:模擬器的日誌在機器忙的時候會晚好幾秒才到,只靠固定延遲
+# 會拍到下一個畫面(甚至 app 已經結束)。
 set -euo pipefail
 
 profile=${1:?機型:iphone | ipad | duo}
@@ -68,7 +70,16 @@ if ! curl -fs http://127.0.0.1:8722/v1/health >/dev/null; then
     pids+=($!)
     sleep 1
 fi
-cleanup() { [ ${#pids[@]} -eq 0 ] || kill "${pids[@]}" 2>/dev/null || true; }
+# 給測試輪詢的確認檔(只聽本機)
+ack=$(mktemp -d)
+python3 -m http.server 8731 --bind 127.0.0.1 --directory "$ack" >/dev/null 2>&1 &
+pids+=($!)
+# 結束時把背景服務收掉,模擬器也關掉:多台模擬器一起開著會把記憶體吃光
+cleanup() {
+    [ ${#pids[@]} -eq 0 ] || kill "${pids[@]}" 2>/dev/null || true
+    rm -rf "$ack"
+    [ -z "${udid:-}" ] || xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
+}
 trap cleanup EXIT
 
 step 'Rust 核心(模擬器 staticlib)'
@@ -137,10 +148,14 @@ while IFS= read -r line; do
     line=${line%$'\r'}
     echo "$line"
     case "$line" in
-        *TTERM_SCENE\ *) scene "${line##*TTERM_SCENE }" ;;
+        *TTERM_SCENE\ *)
+            name=${line##*TTERM_SCENE }
+            scene "$name"
+            touch "$ack/scene-$name" ;;
         *TTERM_SHOT\ *)
             name=${line##*TTERM_SHOT }
             xcrun simctl io "$udid" screenshot ${SCREEN:+--display="$SCREEN"} "$out/$name.png" >/dev/null 2>&1
+            touch "$ack/shot-$name"
             echo "    📸 $out/$name.png" ;;
     esac
 done
