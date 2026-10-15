@@ -1,0 +1,6 @@
+# gen-l10n:英文是 template(key 與 placeholder 型別以它為準),繁中放 app_zh.arb。
+# 簡中等其他中文變體也走 app_zh(見 lib/src/l10n.dart 的 resolveAppLocale)。
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+nullable-getter: false

@@ -1,0 +1,14 @@
+# Plain HTTP on port 8722. Meant for a machine at home that you reach over a VPN
+# (Tailscale, WireGuard). Don't forward this port to the internet; see README.
+services:
+  tterm-sync:
+    image: ghcr.io/tterminal-app/tterminal-sync:latest
+    container_name: tterm-sync
+    ports:
+      - "8722:8722"
+    volumes:
+      - tterm-data:/data
+    restart: unless-stopped
+
+volumes:
+  tterm-data:

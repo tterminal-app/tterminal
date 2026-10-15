@@ -1,0 +1,15 @@
+[package]
+name = "tterm-ssh"
+description = "tterminal SSH session 層:russh 封裝(connect / auth / shell channel / host key 驗證)"
+version.workspace = true
+edition.workspace = true
+license = "GPL-3.0-only"
+
+[dependencies]
+# ring 後端(非 aws-lc-rs)→ Windows 免裝 NASM/CMake,Flutter 打包鏈可直接帶入 SSH
+russh = { version = "0.62", default-features = false, features = ["ring", "flate2", "rsa"] }
+russh-sftp = "2"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync", "io-util", "net"] }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tterm-term = { path = "../tterm-term" }

@@ -1,0 +1,14 @@
+[package]
+name = "tterm-selftest"
+description = "tterminal 核心自我測試:在目標機器上驗證終端引擎與 PTY(Windows 為 ConPTY)"
+version.workspace = true
+edition.workspace = true
+license = "GPL-3.0-only"
+
+[[bin]]
+name = "tterm-selftest"
+path = "src/main.rs"
+
+[dependencies]
+tterm-term = { path = "../tterm-term" }
+tterm-session = { path = "../tterm-session" }

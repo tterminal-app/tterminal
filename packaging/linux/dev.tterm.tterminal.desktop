@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=tterminal
+GenericName=Terminal
+Comment=SSH terminal with end-to-end encrypted sync
+Exec=tterminal
+Icon=dev.tterm.tterminal
+Terminal=false
+Categories=System;TerminalEmulator;Network;
+Keywords=ssh;terminal;shell;tmux;
+StartupWMClass=tterminal

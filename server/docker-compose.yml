@@ -1,0 +1,17 @@
+# tterm 同步 server。在 repo 根目錄的 server/ 下:docker compose up -d --build
+# restart: always + docker 服務 enable → 開機自動啟動。
+services:
+  tterm-sync:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    image: tterm-server
+    container_name: tterm-sync
+    ports:
+      - "8722:8722"
+    volumes:
+      - tterm-data:/data
+    restart: always
+
+volumes:
+  tterm-data:

@@ -1,0 +1,328 @@
+{
+  "@@locale": "en",
+
+  "cancel": "Cancel",
+  "save": "Save",
+  "delete": "Delete",
+  "close": "Close",
+  "copy": "Copy",
+  "clear": "Clear",
+  "reset": "Reset",
+  "refresh": "Refresh",
+  "reconnect": "Reconnect",
+  "settings": "Settings",
+  "gotIt": "Got it",
+  "unknownError": "Unknown error",
+  "connecting": "Connecting…",
+  "ended": "Ended",
+  "remotePath": "Remote: {path}",
+  "@remotePath": {
+    "description": "Tooltip for a path on the SSH host (file browser, editor).",
+    "placeholders": {"path": {"type": "String"}}
+  },
+
+  "vaults": "Vaults",
+  "hosts": "Hosts",
+  "keys": "Keys",
+  "vaultsTooltip": "Vaults (Hosts / Keys)",
+  "vaultsTooltipMobile": "Vaults (manage hosts and keys)",
+  "vaultOpenFailedTitle": "Couldn't open the vault",
+  "vaultOpenFailed": "Couldn't open the vault: {error}",
+  "@vaultOpenFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+
+  "tabTitleDefault": "Terminal {id}",
+  "@tabTitleDefault": {
+    "description": "Tab title before the shell sets one.",
+    "placeholders": {"id": {"type": "int"}}
+  },
+  "tabTitleConnecting": "{title} (connecting…)",
+  "@tabTitleConnecting": {
+    "placeholders": {"title": {"type": "String"}}
+  },
+  "tabTitleEnded": "{title} (ended)",
+  "@tabTitleEnded": {
+    "placeholders": {"title": {"type": "String"}}
+  },
+
+  "newTabTooltip": "New tab (Ctrl+Shift+T)",
+  "closeTabTooltip": "Close (Ctrl+Shift+W)",
+  "closeTab": "Close tab",
+  "filesPanelTooltip": "File browser",
+  "localTerminal": "Local terminal",
+  "noLocalShell": "No local shell",
+  "connectionFailed": "Connection failed",
+  "wheelCaptured": "Wheel captured by app",
+  "wheelCapturedTooltip": "The running program has taken over the mouse wheel (full-screen app or mouse reporting mode).\nIf it was killed before it could clean up, press “Reset terminal” to get scrolling back.",
+  "resetTerminal": "Reset terminal",
+  "restartingTerminal": "Restarting terminal…",
+  "connectingTo": "Connecting to {name}…",
+  "@connectingTo": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "localShellUnavailable": "Local shells aren't available on iOS.",
+  "openVaultsForSsh": "Open Vaults to connect over SSH",
+  "terminalStartFailed": "Couldn't start the terminal\n\n{error}",
+  "@terminalStartFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "localShellFailed": "Couldn't start a shell: {error}",
+  "@localShellFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "sshConnectFailed": "SSH connection failed",
+  "reconnectTitle": "Reconnect?",
+  "reconnectBody": "This will drop the current connection to “{title}” and open a new one.",
+  "@reconnectBody": {
+    "placeholders": {"title": {"type": "String"}}
+  },
+  "cwdNotFound": "Couldn't tell which directory the terminal is in",
+  "vscodeNoRemoteInfo": "Couldn't get the connection details for this host, so VS Code can't open it",
+  "vscodeNotFound": "Couldn't find VS Code (code). Make sure it's installed and on your PATH.",
+  "discardEditsTitle": "Discard unsaved changes?",
+  "discardEditsBody": "{file} has unsaved changes.",
+  "@discardEditsBody": {
+    "placeholders": {"file": {"type": "String"}}
+  },
+  "discard": "Discard",
+  "dragOutTooLarge": "This file is too big to drag out. Open it in the editor and save a copy from there.",
+  "readRemoteFileFailed": "Couldn't read the remote file: {error}",
+  "@readRemoteFileFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "filesUploaded": "{count, plural, =1{Uploaded 1 file to {dir}} other{Uploaded {count} files to {dir}}}",
+  "@filesUploaded": {
+    "description": "Files dropped onto the file browser while it shows an SSH host.",
+    "placeholders": {"count": {"type": "int"}, "dir": {"type": "String"}}
+  },
+  "filesCopied": "{count, plural, =1{Copied 1 file to {dir}} other{Copied {count} files to {dir}}}",
+  "@filesCopied": {
+    "placeholders": {"count": {"type": "int"}, "dir": {"type": "String"}}
+  },
+  "filesUploadedPartly": "Uploaded {count}, skipped: {skipped}",
+  "@filesUploadedPartly": {
+    "placeholders": {"count": {"type": "int"}, "skipped": {"type": "String"}}
+  },
+  "filesCopiedPartly": "Copied {count}, skipped: {skipped}",
+  "@filesCopiedPartly": {
+    "placeholders": {"count": {"type": "int"}, "skipped": {"type": "String"}}
+  },
+  "skippedFolder": "{name} (folder)",
+  "@skippedFolder": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "skippedTooLarge": "{name} (too large)",
+  "@skippedTooLarge": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "skippedWithReason": "{name} ({reason})",
+  "@skippedWithReason": {
+    "placeholders": {"name": {"type": "String"}, "reason": {"type": "String"}}
+  },
+  "keyHookUnknownTool": "a background dictation or macro tool",
+  "keyHookTool": "{tool} (currently running)",
+  "@keyHookTool": {
+    "placeholders": {"tool": {"type": "String"}}
+  },
+  "keyHookWarning": "Your space key may be getting swallowed by a system-wide keyboard hook: you just typed a lot of characters without a single space. This usually happens when {who} has a hotkey that includes Space. It has to hold on to every space press to see whether a shortcut follows, and once it gets stuck it never lets them through. Restarting that tool or changing its hotkey fixes it. Those key presses never reach the terminal, so this isn't a terminal bug.",
+  "@keyHookWarning": {
+    "description": "{who} is keyHookUnknownTool or keyHookTool.",
+    "placeholders": {"who": {"type": "String"}}
+  },
+
+  "deleteConfirm": "Delete “{name}”? It'll be removed from all your synced devices too.",
+  "@deleteConfirm": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "hostSearchHint": "Search by name, address, user, or note",
+  "addHost": "Add Host",
+  "editHost": "Edit Host",
+  "hostCount": "{count, plural, =1{1 host} other{{count} hosts}}",
+  "@hostCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "hostCountFiltered": "{total, plural, =1{{shown} of 1 host} other{{shown} of {total} hosts}}",
+  "@hostCountFiltered": {
+    "placeholders": {"shown": {"type": "int"}, "total": {"type": "int"}}
+  },
+  "hostsEmpty": "No hosts yet. Hit “Add Host” to get started.",
+  "hostsNoMatch": "No hosts match your search",
+  "keyDeleted": "(key deleted)",
+  "hostKeyName": "Key: {name}",
+  "@hostKeyName": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "pin": "Pin to top",
+  "unpin": "Unpin",
+  "sshConnect": "Connect over SSH",
+  "nameRequiredLabel": "Name *",
+  "addressRequiredLabel": "Address *",
+  "port": "Port",
+  "username": "Username",
+  "authMethod": "Authentication",
+  "password": "Password",
+  "sshKey": "SSH key",
+  "authNone": "None (interactive)",
+  "key": "Key",
+  "note": "Note",
+  "hostRequiredFields": "Name and address are required",
+  "sshKeyMissing": "This host's SSH key no longer exists",
+  "keyCount": "{count, plural, =1{1 key} other{{count} keys}}",
+  "@keyCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "addKey": "Add Key",
+  "keysEmpty": "No keys yet. Hit “Add Key” and paste in a private key.",
+  "addSshKey": "Add SSH Key",
+  "editSshKey": "Edit SSH Key",
+  "privateKeyRequiredLabel": "Private key (paste OpenSSH or PEM) *",
+  "passphraseOptionalLabel": "Passphrase (optional)",
+  "keyRequiredFields": "Name and private key are required",
+  "publicKeyCopied": "Public key copied. Paste it into ~/.ssh/authorized_keys on the server.",
+  "publicKeyFailed": "Couldn't get the public key: {error}",
+  "@publicKeyFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "publicKeyPending": "Working out the public key…",
+  "copyPublicKey": "Copy public key",
+  "publicKeyWithFingerprint": "Public key ({fingerprint})",
+  "@publicKeyWithFingerprint": {
+    "placeholders": {"fingerprint": {"type": "String"}}
+  },
+  "deleteFailed": "Couldn't delete: {error}",
+  "@deleteFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+
+  "tabBarPosition": "Tab bar position",
+  "tabBarTop": "Top (horizontal)",
+  "tabBarSide": "Side (vertical list)",
+  "terminalFontSize": "Terminal font size",
+  "fontSmaller": "Smaller",
+  "fontLarger": "Larger",
+  "fontSizeHint": "In the terminal you can also use Ctrl +/-, Ctrl 0, or Ctrl + scroll wheel.",
+  "syncSection": "Sync (self-hosted server)",
+  "syncNotConfigured": "Sync isn't set up yet. Start it from this device, or paste a pairing string exported from another one.",
+  "syncServerLabel": "Sync server address",
+  "setUpSync": "Set up sync",
+  "joinWithPairing": "Join with a pairing string",
+  "syncing": "Syncing…",
+  "syncFailed": "Sync failed: {error}",
+  "@syncFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "lastSynced": "Last synced {time}",
+  "@lastSynced": {
+    "description": "{time} is HH:mm:ss.",
+    "placeholders": {"time": {"type": "String"}}
+  },
+  "notSyncedYet": "Not synced yet",
+  "pendingChanges": "{count, plural, =1{1 change waiting to upload} other{{count} changes waiting to upload}}",
+  "@pendingChanges": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "syncNow": "Sync now",
+  "exportPairing": "Export pairing string",
+  "turnOffSync": "Turn off sync",
+  "pastePairingTitle": "Paste pairing string",
+  "join": "Join",
+  "joinedVault": "{count, plural, =0{Joined the vault.} =1{Joined the vault and merged in 1 item from this device.} other{Joined the vault and merged in {count} items from this device.}}",
+  "@joinedVault": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "pairingStringTitle": "Pairing string",
+  "pairingWarning": "⚠️ This string contains your sync server address, auth token, and encryption key. Anyone who has it can read and change everything in this vault, so only pass it between your own devices.",
+  "turnOffSyncBody": "This only disconnects from the server. Everything on this device stays as it is. Turn off sync?",
+  "turnOff": "Turn off",
+  "turnOffSyncFailed": "Couldn't turn off sync: {error}",
+  "@turnOffSyncFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "serverAddressEmpty": "Enter a server address",
+  "syncServerResponded": "Server responded {status}: {message}",
+  "@syncServerResponded": {
+    "placeholders": {"status": {"type": "int"}, "message": {"type": "String"}}
+  },
+  "syncUnauthorized": "The sync server didn't accept this device's credentials. You may need to pair it again.",
+  "syncVaultNotFound": "The sync server doesn't have this vault anymore.",
+  "syncVaultConflict": "This vault is already registered on the sync server with different credentials.",
+  "conflictCopyName": "{name} (conflicted copy {device} @{time})",
+  "@conflictCopyName": {
+    "description": "Name given to the local version of a host/key when another device changed it at the same time. Rust fills in the placeholders.",
+    "placeholders": {"name": {"type": "String"}, "device": {"type": "String"}, "time": {"type": "String"}}
+  },
+
+  "activeSessions": "Active",
+  "mobileNoHosts": "No hosts yet. Tap ⛁ in the top-right corner to open Vaults and add an SSH host.",
+  "pickConnectionHint": "Pick a connection or a host on the left",
+  "sessionConnected": "Connected",
+  "disconnectAndRemove": "Disconnect and remove",
+  "connections": "Connections",
+  "hideConnectionList": "Hide connection list",
+  "showConnectionList": "Show connection list",
+  "disconnect": "Disconnect",
+  "connectFailedBody": "Couldn't connect\n\n{error}",
+  "@connectFailedBody": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "tapToType": "Tap here to type",
+
+  "readOnlyTooLarge": "Over 5 MB, read-only preview",
+  "readOnlyBinary": "Binary file, can't be edited",
+  "savedRemote": "Saved (remote)",
+  "saved": "Saved",
+  "saveFailed": "Couldn't save: {error}",
+  "@saveFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "linkOpenFailed": "Couldn't open this link: {url}",
+  "@linkOpenFailed": {
+    "placeholders": {"url": {"type": "String"}}
+  },
+  "fileChangedTitle": "File changed on disk",
+  "fileChangedBody": "Another program changed this file while you were editing it. Overwrite it with your version?",
+  "overwrite": "Overwrite",
+  "showSource": "Show source",
+  "previewMarkdown": "Preview Markdown",
+  "saveTooltip": "Save (Ctrl+S)",
+  "closeEscTooltip": "Close (Esc)",
+  "fileOpenFailed": "Couldn't open this file\n{error}",
+  "@fileOpenFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+
+  "openInVscode": "Open in VS Code",
+  "parentFolder": "Up one level",
+  "jumpToCwd": "Go to the terminal's current directory (active tab)",
+  "followCwdOn": "Follow terminal directory (on)",
+  "followCwdOff": "Follow terminal directory (off)",
+  "listDirFailed": "Couldn't read this folder\n{error}",
+  "@listDirFailed": {
+    "placeholders": {"error": {"type": "String"}}
+  },
+  "emptyFolder": "(empty folder)",
+
+  "errHostKeyMismatch": "Host key mismatch! Expected {expected}, but the server presented {actual}. The connection was stopped: someone may be intercepting it, or the server's host key has changed.",
+  "@errHostKeyMismatch": {
+    "description": "Rust error code host_key_mismatch.",
+    "placeholders": {"expected": {"type": "String"}, "actual": {"type": "String"}}
+  },
+  "errTimeout": "{op, select, list_dir{Listing the folder over SFTP timed out (the connection may be down)} home{Finding the home folder over SFTP timed out (the connection may be down)} read_file{Reading the file over SFTP timed out (the connection may be down)} write_file{Writing the file over SFTP timed out (the connection may be down)} exec{The remote command timed out} other{Timed out (the connection may be down)}}",
+  "@errTimeout": {
+    "description": "Rust error code timeout; op says which operation.",
+    "placeholders": {"op": {"type": "String"}}
+  },
+  "errPrivateKeyUnreadable": "Can't read this private key: {reason}",
+  "@errPrivateKeyUnreadable": {
+    "description": "Rust error code private_key_unreadable; reason comes from the SSH library (English).",
+    "placeholders": {"reason": {"type": "String"}}
+  },
+  "errPairingMissingPrefix": "This isn't a tterminal pairing string (it should start with TTERMSYNC1:).",
+  "errPairingUnsupportedVersion": "This pairing string is version {version}, but this version of tterminal only reads v1.",
+  "@errPairingUnsupportedVersion": {
+    "placeholders": {"version": {"type": "int"}}
+  },
+  "errPairingMalformed": "This pairing string is incomplete or damaged. Try copying it again.",
+  "errDecryptFailed": "Couldn't decrypt the data (wrong key, or it's been tampered with)."
+}

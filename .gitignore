@@ -1,0 +1,28 @@
+# Rust
+core/target/
+server/target/
+packaging/win-launcher/target/
+
+# Flutter / Dart
+app/.dart_tool/
+app/build/
+app/.flutter-plugins*
+app/linux/flutter/ephemeral/
+app/windows/flutter/ephemeral/
+app/ios/Flutter/ephemeral/
+app/ios/Flutter/Generated.xcconfig
+app/ios/Flutter/flutter_export_environment.sh
+app/android/.gradle/
+app/ios/Pods/
+
+# 打包產物
+dist/
+build-tmp/
+
+# Misc
+*.log
+.DS_Store
+
+# App Store 截圖(appstore/shoot.sh、compose.py 隨時可重新產生)
+appstore/raw/
+appstore/screenshots/

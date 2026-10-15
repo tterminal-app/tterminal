@@ -1,0 +1,30 @@
+# 獨立 workspace:這個 crate 只在打包 Windows 單檔 exe 時建置,
+# 不應該混進 core 的 `cargo test`。
+[workspace]
+
+[package]
+name = "tterm-win-launcher"
+description = "把 Flutter bundle 包成單一 tterminal.exe 的自解壓啟動器"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-only"
+
+[[bin]]
+name = "tterminal"
+path = "src/main.rs"
+
+[dependencies]
+zip = { version = "8", default-features = false, features = ["deflate"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

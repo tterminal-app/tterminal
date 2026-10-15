@@ -1,0 +1,5 @@
+/* 主畫面上的 app 名稱 */
+"CFBundleDisplayName" = "tterminal";
+
+/* 第一次連到區網裡的主機時,系統問要不要允許存取本地網路 */
+"NSLocalNetworkUsageDescription" = "連線到區網裡的 SSH 主機,或你自己架的同步伺服器時會用到。";

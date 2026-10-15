@@ -1,0 +1,52 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Keeping %lld SSH connections alive" : {
+      "comment" : "鎖定畫面 / 橫幅:app 在背景時還保持著的 SSH 連線數",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Keeping %lld SSH connection alive"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Keeping %lld SSH connections alive"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 個 SSH 連線保持中"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Staying connected over SSH" : {
+      "comment" : "Dynamic Island 展開時的說明(連線數另外顯示在右邊)",
+      "localizations" : {
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SSH 連線保持中"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
