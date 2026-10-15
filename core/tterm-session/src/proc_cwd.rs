@@ -73,7 +73,7 @@ mod imp {
                 }
             }
         }
-        out.sort_by(|a, b| b.0.cmp(&a.0)); // 深度大在前
+        out.sort_by_key(|&(depth, _)| std::cmp::Reverse(depth)); // 深度大在前
         let mut pids: Vec<u32> = out.into_iter().map(|(_, p)| p).collect();
         pids.push(root); // shell 本身墊底
         pids
@@ -145,8 +145,10 @@ mod imp {
             return None;
         }
         let utf16: Vec<u16> = bytes
-            .chunks_exact(2)
-            .map(|c| u16::from_le_bytes([c[0], c[1]]))
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .map(|&c| u16::from_le_bytes(c))
             .collect();
         let mut s = String::from_utf16_lossy(&utf16);
         // cmd.exe 的 cwd 常帶尾端反斜線;去掉但保留磁碟根(如 `C:\`)。
@@ -202,8 +204,20 @@ mod imp {
     /// 直接子行程就夠判斷(有後代必然有直接子行程)。`children` 需要核心的
     /// CONFIG_PROC_CHILDREN,讀不到就回 `None` 讓呼叫端當作「不確定」。
     pub fn has_descendants(pid: u32) -> Option<bool> {
-        let children = std::fs::read_to_string(format!("/proc/{pid}/task/{pid}/children")).ok()?;
-        Some(!children.trim().is_empty())
+        // children 是每條執行緒各一份:子行程記在 fork 它的那條執行緒底下。
+        // 多執行緒的行程(fish、測試執行器)從非主執行緒 spawn 的子行程,
+        // 只看主執行緒的檔案會漏掉,所以每個 task 都要看。
+        let mut readable = false;
+        for task in std::fs::read_dir(format!("/proc/{pid}/task")).ok()?.flatten() {
+            if let Ok(children) = std::fs::read_to_string(task.path().join("children")) {
+                readable = true;
+                if !children.trim().is_empty() {
+                    return Some(true);
+                }
+            }
+        }
+        // 核心沒開 CONFIG_PROC_CHILDREN 就讀不到 → 不確定
+        readable.then_some(false)
     }
 }
 

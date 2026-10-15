@@ -16,6 +16,9 @@
 set -euo pipefail
 
 version=${1:?版本號,例如 1.0.0}
+# deb / rpm 的版本欄位不能有 -(rpm 直接拒絕,deb 會當成修訂號);預發佈版慣例用 ~,
+# 例如 0.0.0-f67273f → 0.0.0~f67273f,排序也會排在正式版 0.0.0 之前。檔名維持原樣。
+pkg_version=${version//-/\~}
 repo=$(cd "$(dirname "$0")/.." && pwd)
 dist="$repo/dist"
 work=$(mktemp -d)
@@ -64,7 +67,7 @@ install_tree "$debroot"
 mkdir -p "$debroot/DEBIAN"
 cat > "$debroot/DEBIAN/control" <<EOF
 Package: tterminal
-Version: $version
+Version: $pkg_version
 Architecture: $deb_arch
 Maintainer: tterminal <https://github.com/tterminal-app/tterminal>
 Installed-Size: $installed_kb
@@ -90,7 +93,7 @@ if command -v rpmbuild >/dev/null 2>&1; then
 %global __os_install_post %{nil}
 
 Name:           tterminal
-Version:        $version
+Version:        $pkg_version
 Release:        1
 Summary:        SSH terminal with end-to-end encrypted sync
 License:        GPL-3.0-only
@@ -114,7 +117,7 @@ cp -a $stage/. %{buildroot}/
 EOF
     rpmbuild --quiet --define "_topdir $rpmtop" --target "$rpm_arch" -bb "$rpmtop/SPECS/tterminal.spec"
     cp "$rpmtop/RPMS/$rpm_arch/"*.rpm "$dist/"
-    echo "  $(ls "$dist"/tterminal-"$version"-1."$rpm_arch".rpm)"
+    echo "  $(ls "$dist"/tterminal-*."$rpm_arch".rpm)"
 else
     echo "  略過:沒有 rpmbuild(apt install rpm)"
 fi
