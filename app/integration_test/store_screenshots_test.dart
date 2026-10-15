@@ -96,7 +96,11 @@ void main() {
 
 /// 把示範主機寫進 vault、接上本機的同步伺服器;回傳 homelab 的 record id。
 Future<String> _seedVault() async {
-  final vault = VaultService.open('${appBaseDir()}${Platform.pathSeparator}vault');
+  // 跟 app 用同一個 key store(iOS 是 Keychain),不然兩邊各拿一把 key
+  final vault = VaultService.open(
+    '${appBaseDir()}${Platform.pathSeparator}vault',
+    keychain: vaultKeychain(),
+  );
   try {
     // 保險:只在專用的截圖模擬器上跑。vault 裡有任何不是示範資料的東西,
     // 或同步接到別的 server,就一個字都不寫直接中止——不然示範主機會混進
