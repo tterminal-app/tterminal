@@ -1,7 +1,8 @@
 {
   "order": ["01-htop", "03-notes", "02-git", "04-home", "05-settings", "06-vaults"],
   "order_by_target": {
-    "ipad-13": ["01-htop", "03-notes", "02-git", "04-home"]
+    "ipad-13": ["01-htop", "03-notes", "02-git", "04-home"],
+    "ipad-13-landscape": ["01-htop", "02-git", "04-home"]
   },
   "zh": {
     "01-htop": ["手機上也能好好用 tmux", "htop、vim 照常跑,捲動很順"],

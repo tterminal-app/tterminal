@@ -110,11 +110,13 @@ case "$locale" in
     *)  want_lang=zh-Hant-TW; want_region=zh_TW ;;
 esac
 prefs="$HOME/Library/Developer/CoreSimulator/Devices/$udid/data/Library/Preferences/.GlobalPreferences.plist"
-cur_lang=$(defaults read "$prefs" AppleLanguages 2>/dev/null | tr -d ' ()"\n' || true)
+# 直接讀磁碟上的檔案:主機端的 defaults 會拿到 cfprefsd 的舊快取,
+# 模擬器關機時寫回去的值看不到
+cur_lang=$(plutil -extract AppleLanguages.0 raw "$prefs" 2>/dev/null || true)
 booted=$(xcrun simctl list devices booted | grep -c "$udid" || true)
-if [ "$cur_lang" != "$want_lang" ] && [ -n "${KEEP_BOOTED:-}" ] && [ "$booted" -gt 0 ]; then
-    # 要保持開機(手動展開的 Duo):不重開機,直接改全域設定,app 重新啟動就會讀到;
-    # 鍵盤也明確指定,不然會沿用上一個語系的輸入法
+# 開機中直接改模擬器裡的全域設定,app 重新啟動就會讀到;
+# 鍵盤也明確指定,不然會沿用上一個語系的輸入法
+set_lang_live() {
     case "$locale" in
         en) want_kb="en_US@sw=QWERTY;hw=Automatic" ;;
         *)  want_kb="zh_Hant-Zhuyin@sw=Zhuyin;hw=Automatic" ;;
@@ -122,16 +124,35 @@ if [ "$cur_lang" != "$want_lang" ] && [ -n "${KEEP_BOOTED:-}" ] && [ "$booted" -
     xcrun simctl spawn "$udid" defaults write -g AppleLanguages -array "$want_lang"
     xcrun simctl spawn "$udid" defaults write -g AppleLocale -string "$want_region"
     xcrun simctl spawn "$udid" defaults write -g AppleKeyboards -array "$want_kb"
+}
+if [ "$cur_lang" != "$want_lang" ] && [ -n "${KEEP_BOOTED:-}" ] && [ "$booted" -gt 0 ]; then
+    # 要保持開機(手動展開的 Duo、手動轉橫的 iPad):不重開機。
+    # 狀態列由 SpringBoard 畫,會沿用開機時的語系(iPad 的日期會是舊語系);
+    # 重啟 SpringBoard 又會把手動轉的方向重設成直的,只能先換語系再轉
+    echo "注意:狀態列會沿用開機時的語系,iPad 日期要對就先換好語系再手動轉向" >&2
+    set_lang_live
 elif [ "$cur_lang" != "$want_lang" ]; then
     # 語系不對才關機改設定;語系本來就對就不動,已經開著的模擬器(例如手動展開的
     # Duo 內螢幕)可以保持原狀
     xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
-    mkdir -p "$(dirname "$prefs")"
-    defaults write "$prefs" AppleLanguages -array "$want_lang"
-    defaults write "$prefs" AppleLocale -string "$want_region"
+    # 用 plutil 直接改檔:主機端的 defaults write 會經過 cfprefsd,不一定馬上寫進磁碟
+    if [ -f "$prefs" ]; then
+        plutil -replace AppleLanguages -json "[\"$want_lang\"]" "$prefs"
+        plutil -replace AppleLocale -string "$want_region" "$prefs"
+    else
+        mkdir -p "$(dirname "$prefs")"
+        defaults write "$prefs" AppleLanguages -array "$want_lang"
+        defaults write "$prefs" AppleLocale -string "$want_region"
+    fi
 fi
 xcrun simctl boot "$udid" 2>/dev/null || true
 xcrun simctl bootstatus "$udid" -b >/dev/null
+# 開機後在模擬器裡再確認一次,不對就當場改(上面改檔有時會被模擬器自己的設定蓋掉)
+live_lang=$(xcrun simctl spawn "$udid" defaults read -g AppleLanguages 2>/dev/null | tr -d ' ()"\n' || true)
+if [ "$live_lang" != "$want_lang" ]; then
+    echo "模擬器語系是 ${live_lang:-?},改成 $want_lang"
+    set_lang_live
+fi
 xcrun simctl ui "$udid" appearance dark
 # 模擬器跟 Mac 共用剪貼簿,鍵盤建議列會秀出剪貼簿內容——先清掉
 printf '' | xcrun simctl pbcopy "$udid"

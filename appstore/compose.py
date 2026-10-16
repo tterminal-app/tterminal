@@ -106,6 +106,27 @@ def wrap(draw, text, fnt, max_width, locale):
     return [l for l in lines if l]
 
 
+def hide_island(shot):
+    """iPhone 橫放的原始畫面:系統有活動時,動態島會被截成右側一顆純黑膠囊
+    (出現時機不固定,重拍不一定躲得掉)。那裡是安全區,只有 app 的底色,
+    把膠囊塗回旁邊的底色。"""
+    if shot.size != (2868, 1320):
+        return shot
+    box = (2690, 420, 2860, 900)
+    region = shot.crop(box)
+    flat = getattr(region, 'get_flattened_data', region.getdata)  # 新版 Pillow 改名,舊版只有 getdata
+    data = list(flat())
+    if sum(p == (0, 0, 0) for p in data) < 5000:
+        return shot
+    fill = shot.getpixel((box[0] - 10, 660))
+    # 連邊緣反鋸齒的半黑像素一起塗(比底色暗的都是膠囊)
+    data = [fill if sum(p) < sum(fill) - 3 else p for p in data]
+    region.putdata(data)
+    shot = shot.copy()
+    shot.paste(region, box[:2])
+    return shot
+
+
 def compose(raw, size, device_ratio, corner_ratio, title, subtitle, locale):
     w, h = size
     canvas = background(size).convert('RGBA')
@@ -116,7 +137,7 @@ def compose(raw, size, device_ratio, corner_ratio, title, subtitle, locale):
     # 標語
     title_font = font(locale, round(unit * (0.074 if not landscape else 0.07)), True)
     sub_font = font(locale, round(unit * (0.037 if not landscape else 0.036)), False)
-    max_text = w * (0.88 if not landscape else 0.7)
+    max_text = w * (0.88 if not landscape else 0.9)
     y = round(h * (0.055 if not landscape else 0.06))
     for line in wrap(draw, title, title_font, max_text, locale):
         tw = draw.textlength(line, font=title_font)
@@ -129,12 +150,17 @@ def compose(raw, size, device_ratio, corner_ratio, title, subtitle, locale):
         y += round(sub_font.size * 1.45)
     top = y + round(unit * 0.05)
 
-    # 裝置:原始畫面 + 外框,底部可以超出畫布
-    shot = Image.open(raw).convert('RGB')
+    # 裝置:原始畫面 + 外框,直式的底部可以超出畫布
+    shot = hide_island(Image.open(raw).convert('RGB'))
     dev_w = round(w * device_ratio)
-    bezel = max(6, round(dev_w * 0.018))
-    screen_w = dev_w - 2 * bezel
-    screen_h = round(shot.height * screen_w / shot.width)
+    while True:
+        bezel = max(6, round(dev_w * 0.018))
+        screen_w = dev_w - 2 * bezel
+        screen_h = round(shot.height * screen_w / shot.width)
+        # 橫向的底部常是鍵盤或功能鍵列,不能裁掉:放不下就把裝置縮小
+        if not landscape or top + screen_h + 2 * bezel <= h - round(unit * 0.03):
+            break
+        dev_w = round(dev_w * 0.98)
     shot = shot.resize((screen_w, screen_h), Image.LANCZOS)
     radius = round(min(screen_w, screen_h) * corner_ratio)  # 橫向也以短邊算圓角
     dev_h = screen_h + 2 * bezel

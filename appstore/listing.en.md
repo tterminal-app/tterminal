@@ -34,7 +34,7 @@ The phone version doesn't have SFTP file browsing or mosh yet. If there's someth
 
 ## Keywords (100, comma-separated, don't repeat words from name/subtitle)
 
-terminal,tmux,vim,linux,shell,remote,server,devops,raspberry pi,console,command line,keys
+tmux,vim,linux,shell,remote,server,devops,raspberry pi,console,command line,keys,homelab,nas
 
 ## What's new
 
