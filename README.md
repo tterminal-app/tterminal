@@ -29,7 +29,7 @@
 
 Desktop builds are free. The App Store version is how the project gets paid for; you're also welcome to build the iOS app yourself from this repo.
 
-The macOS build isn't notarized yet: the first time, right-click the app and choose Open. On Windows, SmartScreen may warn about an unrecognized app until the builds are signed.
+The macOS build is signed with a Developer ID and notarized by Apple, so it opens with a double-click. On Windows, SmartScreen may warn about an unrecognized app until the builds are signed.
 
 ## Build from source
 
@@ -97,7 +97,7 @@ Windows、macOS、Linux、iPhone 和 iPad 都能用的 SSH 終端機。畫面用
 
 桌面版(Windows x64 / arm64、macOS universal、Linux x64 / arm64)在 [Releases](https://github.com/tterminal-app/tterminal/releases),免費。iPhone 和 iPad 版在 App Store:免費下載、14 天試用,喜歡再一次買斷。App Store 版是這個專案的收入來源,你也可以用這個 repo 自己編 iOS 版。
 
-macOS 版還沒做公證,第一次開啟請在 app 上按右鍵選「打開」。Windows 版在簽章前,SmartScreen 可能會跳出警告。
+macOS 版用 Developer ID 簽章並通過 Apple 公證,下載後直接雙擊就能開。Windows 版在簽章前,SmartScreen 可能會跳出警告。
 
 ### 自己編譯
 

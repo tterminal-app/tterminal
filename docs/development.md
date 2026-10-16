@@ -102,7 +102,9 @@ cd core && cargo build --release --target x86_64-pc-windows-gnu
 
 Rust 核心會 arm64 / x86_64 各編一份再 lipo 成 universal dylib,塞進 .app 的
 `Contents/MacOS/` 後重新簽章。預設 ad-hoc 簽章(zip 複製到其他 Mac 首次開啟
-需右鍵→打開);有 Developer ID 憑證時用 `TTERM_SIGN_IDENTITY` 換成正式簽章。
+需右鍵→打開);有 Developer ID 憑證時用 `TTERM_SIGN_IDENTITY` 換成正式簽章
+(加上 hardened runtime),再用 `scripts/notarize-macos.sh <版本>` 公證並釘上票據。
+CI(release.yml)讀 `scripts/set-macos-signing-secrets.sh` 設好的 secrets 做同樣的事。
 App Sandbox 已停用——終端機要 spawn shell、讀寫任意路徑、連 SSH。
 
 **rustc 要夠新**:macOS 26+ 的 dyld 會拒載舊 rustc(≤1.90)release 建置

@@ -14,8 +14,9 @@
 #   scripts/build-macos.sh               # 完整流程(含 cargo test 與 flutter test)
 #   scripts/build-macos.sh --skip-tests  # 只建置
 #
-# 預設 ad-hoc 簽章(其他機器首次開啟要右鍵→打開)。有開發者憑證時:
+# 預設 ad-hoc 簽章(其他機器首次開啟要右鍵→打開)。有 Developer ID 憑證時:
 #   TTERM_SIGN_IDENTITY="Developer ID Application: ..." scripts/build-macos.sh
+# 會加上 hardened runtime 與安全時間戳記(公證的必要條件),公證見 scripts/notarize-macos.sh。
 set -euo pipefail
 
 skip_tests=0
@@ -87,9 +88,18 @@ bundle="$app/build/macos/Build/Products/Release/tterminal.app"
 
 step '把 dylib 塞進 bundle 並重新簽章'
 cp "$dylib" "$bundle/Contents/MacOS/libtterm_ffi.dylib"
-codesign --force --sign "$sign_identity" "$bundle/Contents/MacOS/libtterm_ffi.dylib"
-codesign --force --sign "$sign_identity" \
-    --entitlements "$app/macos/Runner/Release.entitlements" "$bundle"
+sign_opts=()
+if [ "$sign_identity" != "-" ]; then
+    # 公證要求 hardened runtime 與安全時間戳記;ad-hoc 不需要(也拿不到時間戳記)
+    sign_opts=(--options runtime --timestamp)
+fi
+sign() { codesign --force ${sign_opts[@]+"${sign_opts[@]}"} --sign "$sign_identity" "$@"; }
+# 由內而外:Flutter 的 framework 原本是 ad-hoc 簽章,公證時每一層都要是同一個 Developer ID
+for fw in "$bundle"/Contents/Frameworks/*.framework; do
+    sign "$fw"
+done
+sign "$bundle/Contents/MacOS/libtterm_ffi.dylib"
+sign --entitlements "$app/macos/Runner/Release.entitlements" "$bundle"
 codesign --verify --deep --strict "$bundle"
 echo "  簽章:$sign_identity(驗證通過)"
 
