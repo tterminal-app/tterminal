@@ -2,7 +2,18 @@
   "order": ["01-htop", "03-notes", "02-git", "04-home", "05-settings", "06-vaults"],
   "order_by_target": {
     "ipad-13": ["01-htop", "03-notes", "02-git", "04-home"],
-    "ipad-13-landscape": ["01-htop", "02-git", "04-home"]
+    "ipad-13-landscape": ["01-htop", "03-notes", "02-git", "04-home"]
+  },
+  "captions_by_target": {
+    "ipad-13-landscape": {
+      "zh": {
+        "01-htop": ["iPad 上也能好好用 tmux", "htop、vim 照常跑,捲動很順"],
+        "03-notes": ["鍵盤上沒有的鍵,這裡都有", "esc、ctrl、tab、方向鍵,^C 一鍵送出"]
+      },
+      "en": {
+        "01-htop": ["tmux on your iPad, for real", "htop and vim run fine, and scrolling is smooth."]
+      }
+    }
   },
   "zh": {
     "01-htop": ["手機上也能好好用 tmux", "htop、vim 照常跑,捲動很順"],

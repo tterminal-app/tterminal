@@ -213,7 +213,9 @@ def main():
                     # 例:Duo 外螢幕不讓 app 自己轉方向,拍出來還是直的
                     print(f'  略過 {raw.relative_to(ROOT)}:方向跟 {target} 不同')
                     continue
-            title, subtitle = text[name]
+            # 個別尺寸可以換標語(例:iPad 橫放沒拍到螢幕鍵盤,注音那張改講功能鍵)
+            override = captions.get('captions_by_target', {}).get(target, {}).get(locale, {})
+            title, subtitle = override.get(name, text[name])
             compose(raw, size, device_ratio, corner_ratio, title, subtitle, locale).save(
                 out / f'{i:02d}-{name[3:]}.png')
         print(f'{target}: {out.relative_to(ROOT)}')
