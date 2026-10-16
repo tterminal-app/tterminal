@@ -368,6 +368,19 @@ void main() {
         lessThanOrEqualTo(300),
       );
     });
+
+    testWidgets('iPhone 橫放:左欄 300pt 不含動態島那側的安全區', (tester) async {
+      addTearDown(tester.view.reset);
+      setWindow(tester, const Size(932, 430));
+      tester.view.padding = const FakeViewPadding(left: 62, right: 62);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark(useMaterial3: true),
+          home: MobileShell(tabs: tabs, prefs: prefs, vault: service),
+        ),
+      );
+      expect(tester.getTopRight(find.byType(ListView)).dx, 362);
+    });
   });
 
   group('TerminalView 摺痕與 resize', () {

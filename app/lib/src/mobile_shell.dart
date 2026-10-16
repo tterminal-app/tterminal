@@ -353,7 +353,10 @@ class _TwoPane extends StatelessWidget {
       return (leading: book.start, gap: book.end - book.start, fold: true);
     }
     if (area.width >= wideBreakpoint) {
-      return (leading: sidebarWidth, gap: 1, fold: false);
+      // 左側安全區另外加:iPhone 橫放時動態島那側約 60pt,算在 300 裡面
+      // 標題就只剩一百出頭,「Connections」會被截掉
+      final inset = MediaQuery.paddingOf(context).left;
+      return (leading: sidebarWidth + inset, gap: 1, fold: false);
     }
     return null;
   }
