@@ -4,19 +4,19 @@
     "ipad-13": ["01-htop", "03-notes", "02-git", "04-home"]
   },
   "zh": {
-    "01-htop": ["口袋裡的真終端機", "htop、vim、tmux 都照常跑,捲動很順"],
-    "03-notes": ["注音打字,不會跳掉", "組字就在游標上,選好字才送出去"],
-    "02-git": ["中文不再變亂碼", "commit 訊息、檔名、全形字都對得整整齊齊"],
-    "04-home": ["常用的主機,點一下就連上", "切去回個訊息再回來,連線還在"],
-    "05-settings": ["同步走你自己的伺服器", "端對端加密,伺服器只看得到密文,程式碼也公開"],
-    "06-vaults": ["先用 14 天,喜歡再買斷", "沒有訂閱、不用註冊帳號,也不蒐集你的任何資料"]
+    "01-htop": ["手機上也能好好用 tmux", "htop、vim 照常跑,捲動很順"],
+    "03-notes": ["用注音打字,不會打到一半消失", "選好字才送出去"],
+    "02-git": ["中文檔名、全形字不會亂掉", "commit 訊息也看得清清楚楚"],
+    "04-home": ["常用的主機,點一下就連", "切出去回個訊息,連線還在"],
+    "05-settings": ["用自己的伺服器同步", "先在手機上加密才送出去,伺服器只看得到密文"],
+    "06-vaults": ["先免費用 14 天", "喜歡再買斷,沒有訂閱"]
   },
   "en": {
-    "01-htop": ["A real terminal for your pocket", "htop, vim and tmux just work. Scrolling stays smooth."],
-    "03-notes": ["The keys your keyboard forgot", "Esc, Ctrl, Tab and arrows sit right above it. ^C is one tap."],
-    "02-git": ["Feels like your desktop", "Colors, tmux panes and status bars render exactly right."],
-    "04-home": ["Your servers, one tap away", "Pop out to answer a message. Your session is still there."],
-    "05-settings": ["Sync through your own server", "End-to-end encrypted. The server is open source and only sees ciphertext."],
-    "06-vaults": ["Try it free for 14 days", "Then unlock it once. No subscription, no account, no tracking."]
+    "01-htop": ["tmux on your phone, for real", "htop and vim run fine, and scrolling is smooth."],
+    "03-notes": ["The keys your keyboard is missing", "esc, ctrl, tab and arrows, plus one-tap ^C."],
+    "02-git": ["Looks like your desktop terminal", "Colors, tmux panes and status bars, all intact."],
+    "04-home": ["Your servers, one tap away", "Switch apps for a minute. The session is still there."],
+    "05-settings": ["Sync through your own server", "Encrypted on the device first. The server only sees ciphertext."],
+    "06-vaults": ["Free for 14 days", "Then pay once if you like it. No subscription."]
   }
 }
