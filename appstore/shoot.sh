@@ -9,6 +9,8 @@
 #
 # 環境變數:FONT=18 終端字級;SCREEN=3 截哪個螢幕(iPhone Duo 內螢幕,見 simctl io <udid> enumerate);
 #           KEEP_BOOTED=1 結束時不關模擬器(Duo 內螢幕要先在 DeviceHub 手動展開)
+#           SHOT_TEST=integration_test/xxx_test.dart 改跑別的截圖測試(預設商店截圖)
+#           SHOT_NO_HOST=1 不用示範主機與同步伺服器(例:內購審查截圖),Docker 也不必開
 #
 # 會先備好:
 #   * 示範 SSH 主機:docker 容器 tterm-demo(本機 127.0.0.1:22),tmux 場景見 demo-host/setup.sh
@@ -45,6 +47,8 @@ out=$(cd "$out" && pwd)
 
 step() { printf '\n\033[36m==> %s\033[0m\n' "$1"; }
 
+pids=()
+if [ -z "${SHOT_NO_HOST:-}" ]; then
 step '示範 SSH 主機'
 if ! docker inspect -f '{{.State.Running}}' tterm-demo 2>/dev/null | grep -q true; then
     docker rm -f tterm-demo >/dev/null 2>&1 || true
@@ -58,7 +62,6 @@ docker cp "$repo/appstore/demo-host/setup.sh" tterm-demo:/tmp/setup.sh
 docker exec -e SHOT_LOCALE="$locale" tterm-demo sh /tmp/setup.sh
 
 step 'homelab.local 與同步伺服器'
-pids=()
 if ! dscacheutil -q host -a name homelab.local | grep -q 127.0.0.1; then
     dns-sd -P homelab _ssh._tcp local 22 homelab.local 127.0.0.1 >/dev/null &
     pids+=($!)
@@ -71,6 +74,7 @@ if ! curl -fs http://127.0.0.1:8722/v1/health >/dev/null; then
     pids+=($!)
     sleep 1
 fi
+fi # SHOT_NO_HOST
 # 給測試輪詢的確認檔(只聽本機)
 ack=$(mktemp -d)
 python3 -m http.server 8731 --bind 127.0.0.1 --directory "$ack" >/dev/null 2>&1 &
@@ -177,7 +181,7 @@ step "跑截圖流程($locale${landscape:+,橫放})"
 cd "$repo/app"
 flutter drive \
     --driver test_driver/integration_test.dart \
-    --target integration_test/store_screenshots_test.dart \
+    --target "${SHOT_TEST:-integration_test/store_screenshots_test.dart}" \
     -d "$udid" \
     --dart-define=SHOT_LOCALE="$locale" \
     ${landscape:+--dart-define=SHOT_LANDSCAPE=true} \

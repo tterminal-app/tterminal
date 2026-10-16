@@ -42,7 +42,14 @@ App 端的程式:`app/lib/src/purchases.dart`(狀態與購買服務)、`app/lib/
 
 ### 審查用截圖
 
-每個品項要上傳一張「這個品項在 App 裡長什麼樣」的截圖,只給審查人員看,不會出現在商店頁。用模擬器截整個螢幕就可以(做法見下面「本機測試」)。
+每個品項要上傳一張「這個品項在 App 裡長什麼樣」的截圖,只給審查人員看,不會出現在商店頁。用模擬器截整個螢幕就可以,兩張都能自動拍(不需要 Docker 和示範主機):
+
+```bash
+SHOT_TEST=integration_test/iap_review_screenshots_test.dart SHOT_NO_HOST=1 \
+  appstore/shoot.sh iphone appstore/raw/iap-review-en en
+```
+
+產出 `iap-trial.png` 與 `iap-unlock.png`(1320×2868)。價格是測試用的假字串 US$14.99,跟美國區定價一致。
 
 - **試用**:第一次開 App 自動跳出的試用說明,標題「Try tterminal free for 14 days」,上面列著試用多久、到期後哪些不能用、解鎖價格,下面是「Start 14-day trial」按鈕。
 - **解鎖**:開始試用後,設定 → Trial & unlock → Unlock 打開的「Unlock tterminal」畫面,有價格和「Unlock for $14.99」按鈕。(試用到期後點主機跳出來的「Your trial has ended」也可以,但要等 14 天才拍得到。)

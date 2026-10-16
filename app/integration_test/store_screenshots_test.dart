@@ -9,7 +9,6 @@
 //   --dart-define=SHOT_LANDSCAPE=true  橫放(iPhone Duo 內螢幕攤平)
 //   --dart-define=SHOT_FONT_SIZE=18    終端字級(iPad 這種大螢幕放大一點)
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -22,6 +21,8 @@ import 'package:tterm_app/src/fold.dart';
 import 'package:tterm_app/src/purchases.dart';
 import 'package:tterm_app/src/terminal_view.dart';
 import 'package:tterm_app/src/vault_service.dart';
+
+import 'shot_helpers.dart';
 
 const _locale = String.fromEnvironment('SHOT_LOCALE', defaultValue: 'zh');
 const _landscape = bool.fromEnvironment('SHOT_LANDSCAPE');
@@ -46,7 +47,9 @@ void main() {
 
   testWidgets('store screenshots', (tester) async {
     final demoId = await _seedVault();
-    if (_fontSize.isNotEmpty) _setFontSize(double.parse(_fontSize));
+    if (_fontSize.isNotEmpty) {
+      updatePrefs({'termFontSize': double.parse(_fontSize)});
+    }
 
     if (_landscape) {
       await SystemChrome.setPreferredOrientations([
@@ -58,39 +61,39 @@ void main() {
     await tester.pumpWidget(
       TtermApp(demoMode: false, purchases: FakePurchaseService.unlocked()),
     );
-    await _pause(tester, 1500);
+    await pause(tester, 1500);
 
     // 連上示範主機
     await tester.tap(find.byKey(ValueKey('host-$demoId')).first);
-    await _waitFor(tester, find.byType(TerminalView));
-    await _pause(tester, 2000);
+    await waitFor(tester, find.byType(TerminalView));
+    await pause(tester, 2000);
 
     // 前兩張收起鍵盤讓終端用滿;中文筆記那張再叫出鍵盤(注音 + 功能鍵列)
     FocusManager.instance.primaryFocus?.unfocus();
-    await _pause(tester, 1000);
-    await _shot(tester, '01-htop', scene: 'htop');
-    await _shot(tester, '02-git', scene: 'git');
+    await pause(tester, 1000);
+    await shot(tester, '01-htop', scene: 'htop');
+    await shot(tester, '02-git', scene: 'git');
     tester.state<TerminalViewState>(find.byType(TerminalView)).requestFocus();
-    await _pause(tester, 1000);
-    await _shot(tester, '03-notes', scene: 'notes');
+    await pause(tester, 1000);
+    await shot(tester, '03-notes', scene: 'notes');
     FocusManager.instance.primaryFocus?.unfocus();
 
     // 回首頁:連線留在「進行中」
-    _navigator(tester).pop();
-    await _pause(tester, 1000);
-    await _shot(tester, '04-home');
+    navigator(tester).pop();
+    await pause(tester, 1000);
+    await shot(tester, '04-home');
 
     await tester.tap(find.byKey(const Key('btn-settings')));
-    await _pause(tester, 1000);
-    await _shot(tester, '05-settings');
-    _navigator(tester).pop();
-    await _pause(tester, 800);
+    await pause(tester, 1000);
+    await shot(tester, '05-settings');
+    navigator(tester).pop();
+    await pause(tester, 800);
 
     await tester.tap(find.byKey(const Key('btn-vaults')));
-    await _pause(tester, 1000);
-    await _shot(tester, '06-vaults');
-    _navigator(tester).pop();
-    await _pause(tester, 800);
+    await pause(tester, 1000);
+    await shot(tester, '06-vaults');
+    navigator(tester).pop();
+    await pause(tester, 800);
   }, timeout: const Timeout(Duration(minutes: 5)));
 }
 
@@ -144,71 +147,5 @@ Future<String> _seedVault() async {
     return demoId!;
   } finally {
     vault.dispose();
-  }
-}
-
-/// 直接改 prefs.json(app 啟動時讀),其他設定原樣保留。
-void _setFontSize(double size) {
-  final file = File('${appBaseDir()}${Platform.pathSeparator}prefs.json');
-  final json = file.existsSync()
-      ? (jsonDecode(file.readAsStringSync()) as Map).cast<String, dynamic>()
-      : <String, dynamic>{};
-  json['termFontSize'] = size;
-  file.parent.createSync(recursive: true);
-  file.writeAsStringSync(jsonEncode(json));
-}
-
-NavigatorState _navigator(WidgetTester tester) =>
-    tester.state<NavigatorState>(find.byType(Navigator).first);
-
-Future<void> _pause(WidgetTester tester, int ms) async {
-  await Future<void>.delayed(Duration(milliseconds: ms));
-  await tester.pump();
-}
-
-Future<void> _waitFor(WidgetTester tester, Finder finder) async {
-  for (var i = 0; i < 60; i++) {
-    if (finder.evaluate().isNotEmpty) return;
-    await _pause(tester, 500);
-  }
-  throw StateError('等不到 $finder');
-}
-
-/// [scene] 先請示範主機切畫面,等 tmux 重畫完再截。
-///
-/// 每一步都等 shoot.sh 確認做完才往下走:模擬器的日誌在機器忙的時候會晚好幾秒
-/// 才送到 shoot.sh,只靠固定延遲會拍到下一個畫面。
-Future<void> _shot(WidgetTester tester, String name, {String? scene}) async {
-  if (scene != null) {
-    // ignore: avoid_print
-    print('TTERM_SCENE $scene');
-    await _awaitAck(tester, 'scene-$scene');
-    await _pause(tester, 1500); // tmux 換視窗後的重畫
-  }
-  await _pause(tester, 800);
-  // ignore: avoid_print
-  print('TTERM_SHOT $name');
-  await _awaitAck(tester, 'shot-$name');
-}
-
-/// 等 shoot.sh 在 127.0.0.1:8731 放好確認檔。
-Future<void> _awaitAck(WidgetTester tester, String key) async {
-  final client = HttpClient()..connectionTimeout = const Duration(seconds: 2);
-  try {
-    final deadline = DateTime.now().add(const Duration(minutes: 2));
-    while (DateTime.now().isBefore(deadline)) {
-      try {
-        final req = await client.getUrl(Uri.parse('http://127.0.0.1:8731/$key'));
-        final resp = await req.close();
-        await resp.drain<void>();
-        if (resp.statusCode == 200) return;
-      } on IOException {
-        // shoot.sh 的確認服務還沒起來,繼續等
-      }
-      await _pause(tester, 300);
-    }
-    throw StateError('等不到 shoot.sh 確認 $key');
-  } finally {
-    client.close(force: true);
   }
 }
