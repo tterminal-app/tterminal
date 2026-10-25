@@ -24,7 +24,7 @@ The rest of what you'd expect from a terminal is here too. htop, vim and tmux be
 
 Switch away to answer a message and your session is usually still there when you come back. While the app is in the background, the Dynamic Island shows how many connections are open. iOS only allows so much background time, though, so a long break will still drop them.
 
-To share hosts between your iPhone and iPad, you can run your own sync server with a single docker command. Everything is encrypted on the device before it's sent, so the server only stores ciphertext. It's best kept at home on a NAS or a small box, not open to the internet, and reached over a VPN when you're out. The server code is on GitHub.
+To share hosts between your iPhone and iPad, you can run your own sync server with a single docker command. Everything is encrypted on the device before it's sent, so the server only stores ciphertext. It's best kept at home on a NAS or a small box rather than open to the internet. The server code is on GitHub.
 
 On an iPad or an unfolded iPhone Duo you get two columns: connections on the left, terminal on the right.
 
