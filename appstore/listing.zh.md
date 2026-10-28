@@ -12,7 +12,7 @@ tterminal
 
 ## 宣傳文字(170)
 
-下載免費,14 天內所有功能都能用,喜歡再一次買斷。用注音、倉頡打中文,不會打到一半整串不見。
+用注音、倉頡打中文,不會打到一半整串不見。htop、vim、tmux 照常跑,主機清單還能用自己架的伺服器同步。
 
 ## 描述(4000)
 
@@ -22,7 +22,7 @@ tterminal
 
 其他終端機該有的也都有。htop、vim、tmux 這類全螢幕程式照常跑,捲動很順。鍵盤上方多一排 esc、ctrl、tab 和方向鍵,^C、^D 按一下就送出;長按畫面再拖曳,可以當方向鍵用。登入可以用密碼或金鑰,金鑰也能直接在 app 裡產生。第一次連線會記住主機指紋,之後對不上的話,會先停下來讓你看差在哪,確認了才連。
 
-切出去回個訊息再回來,連線通常還在,app 在背景時,動態島也會顯示目前掛著幾條連線。不過 iOS 給背景的時間有限,離開太久還是會斷。
+切出去回個訊息再回來,連線通常還在。在 iPhone 上,app 退到背景時,動態島會顯示目前掛著幾條連線。不過 iOS 給背景的時間有限,離開太久還是會斷。
 
 想讓 iPhone 和 iPad 用同一份主機清單,可以自己架同步伺服器,一個 docker 指令就能跑起來。資料在手機上就先加密才送出去,伺服器存的只有密文。比較建議放在家裡的 NAS 或小主機,不要開到外網。伺服器的程式碼在 GitHub 上公開。
 
@@ -58,9 +58,12 @@ terminal,tmux,vim,linux,遠端連線,伺服器,主機,金鑰,shell,命令列,注
 
 審查人員要能真的連上一台 SSH 主機才測得了。請在備註裡提供一台示範主機,例如在你的 VPS 上跑一個 `lscr.io/linuxserver/openssh-server` 容器,開一組只給審查用的帳號。內購的設定與兩個品項各自的審查備註見 [iap.md](iap.md)。審查備註是整個 App 共用一份(不分語言),英文版商店資料那邊不用另外填。
 
-> tterminal is an SSH client. On first launch it explains the free trial (how long it lasts, what stops working afterwards and the unlock price). Tap "Start 14-day trial" and confirm the $0 purchase. This is the "14-day Trial" non-consumable (dev.tterm.ttermApp.trial14), following guideline 3.1.1.
-> To connect, tap the server icon (top right) → Add Host and enter:
+> tterminal is an SSH client. Both in-app purchases are non-consumables and appear in this build:
+> 1. "14-day Trial" (dev.tterm.ttermApp.trial14, $0): on first launch the app shows "Try tterminal free for 14 days", which explains how long the trial lasts, what stops working afterwards and the unlock price. Tap "Start 14-day trial" and confirm the $0 purchase (guideline 3.1.1). If that screen was closed, the same button is in Settings (gear icon, top right) → Trial & unlock.
+> 2. "Unlock tterminal" (dev.tterm.ttermApp.unlock): once the trial has started, go to Settings (gear icon, top right) → Trial & unlock → Unlock. Restore purchases is next to it.
+> To connect, tap the server icon (top right, next to the gear) → Add Host and enter:
 > Address: <示範主機位址>  Port: <埠>  Username: <帳號>  Password: <密碼>
 > Then go back and tap the host.
-> Everything works during the trial. The one-time "Unlock tterminal" purchase (dev.tterm.ttermApp.unlock) is in Settings → Trial & unlock → Unlock, next to Restore purchases. If the trial ends without an unlock, hosts, keys, Vaults, Settings and sync keep working; only opening a new SSH connection shows the unlock screen.
+> Everything works during the trial. If the trial ends without an unlock, hosts, keys, Vaults, Settings and sync keep working; only opening a new SSH connection shows the unlock screen.
+> The app has no Home Screen widgets, on iPhone or iPad. Its WidgetKit extension only provides a Live Activity: on iPhone, while an SSH connection is open and the app is in the background, the Lock Screen and Dynamic Island show how many connections are being kept alive. It starts by itself and there is nothing to add to the Home Screen.
 > Sync is optional and requires the user's own self-hosted server (open source: https://github.com/tterminal-app/tterminal-sync), so it isn't needed for review.

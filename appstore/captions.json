@@ -21,7 +21,7 @@
     "02-git": ["中文檔名、全形字不會亂掉", "commit 訊息也看得清清楚楚"],
     "04-home": ["常用的主機,點一下就連", "切出去回個訊息,連線還在"],
     "05-settings": ["用自己的伺服器同步", "先在手機上加密才送出去,伺服器只看得到密文"],
-    "06-vaults": ["先免費用 14 天", "喜歡再買斷,沒有訂閱"]
+    "06-vaults": ["主機和金鑰,一個地方管好", "可以搜尋、加星號,金鑰也能直接產生"]
   },
   "en": {
     "01-htop": ["tmux on your phone, for real", "htop and vim run fine, and scrolling is smooth."],
@@ -29,6 +29,6 @@
     "02-git": ["Looks like your desktop terminal", "Colors, tmux panes and status bars, all intact."],
     "04-home": ["Your servers, one tap away", "Switch apps for a minute. The session is still there."],
     "05-settings": ["Sync through your own server", "Encrypted on the device first. The server only sees ciphertext."],
-    "06-vaults": ["Free for 14 days", "Then pay once if you like it. No subscription."]
+    "06-vaults": ["Hosts and keys in one place", "Search, star favorites, or generate a key in the app."]
   }
 }

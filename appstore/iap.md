@@ -101,7 +101,7 @@ flutter build ipa --dart-define=TTERM_IAP=false
    ```
 
    ```bash
-   cd app && DEVELOPER_DIR=/Applications/Xcode-27.1-RC.app/Contents/Developer flutter build ios --simulator --debug
+   cd app && DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer flutter build ios --simulator --debug
    ```
 
 2. 用 Xcode 開 `app/ios/Runner.xcworkspace`。

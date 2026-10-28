@@ -12,7 +12,7 @@ SSH terminal that handles IMEs
 
 ## Promotional text (170)
 
-Free to download, with everything unlocked for 14 days, then a one-time purchase. Type Chinese or Japanese over SSH without losing half of what you wrote.
+Type Chinese or Japanese over SSH without losing half of what you wrote. htop, vim and tmux behave, and your hosts can sync through a server you run yourself.
 
 ## Description (4000)
 
@@ -22,7 +22,7 @@ Composition shows up at the cursor and only goes to the server once you've picke
 
 The rest of what you'd expect from a terminal is here too. htop, vim and tmux behave, and scrolling is smooth. There's a row of esc, ctrl, tab and arrow keys above the keyboard, with one-tap ^C and ^D, and you can long-press and drag on the screen to use it as arrow keys. Log in with a password or a key, or generate a key right in the app. Host fingerprints are remembered on first connect; if one changes later, tterminal stops and shows you what changed before it connects.
 
-Switch away to answer a message and your session is usually still there when you come back. While the app is in the background, the Dynamic Island shows how many connections are open. iOS only allows so much background time, though, so a long break will still drop them.
+Switch away to answer a message and your session is usually still there when you come back. On iPhone, while the app is in the background, the Dynamic Island shows how many connections are open. iOS only allows so much background time, though, so a long break will still drop them.
 
 To share hosts between your iPhone and iPad, you can run your own sync server with a single docker command. Everything is encrypted on the device before it's sent, so the server only stores ciphertext. It's best kept at home on a NAS or a small box rather than open to the internet. The server code is on GitHub.
 
@@ -42,4 +42,4 @@ First release.
 
 ## Review notes
 
-App Review notes are one field for the whole app, not per language, so there's only one copy: the English note in listing.zh.md. It covers the demo SSH host the reviewer needs, starting the free trial on first launch ("Start 14-day trial", the $0 "14-day Trial" IAP), and where to find "Unlock tterminal" and Restore purchases (Settings → Trial & unlock). The per-IAP review notes are in iap.md.
+App Review notes are one field for the whole app, not per language, so there's only one copy: the English note in listing.zh.md. It covers the demo SSH host the reviewer needs, starting the free trial on first launch ("Start 14-day trial", the $0 "14-day Trial" IAP), and where to find "Unlock tterminal" and Restore purchases (Settings → Trial & unlock). It also says there are no Home Screen widgets: the WidgetKit extension is only the iPhone Live Activity. The per-IAP review notes are in iap.md.

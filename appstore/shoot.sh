@@ -38,7 +38,7 @@ case "$profile" in
 esac
 
 repo=$(cd "$(dirname "$0")/.." && pwd)
-export DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode-27.1-RC.app/Contents/Developer}
+export DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}
 if ! command -v flutter >/dev/null 2>&1 && [ -x "$HOME/flutter/bin/flutter" ]; then
     export PATH="$HOME/flutter/bin:$PATH"
 fi
