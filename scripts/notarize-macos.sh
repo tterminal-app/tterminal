@@ -48,6 +48,18 @@ notarize() {
     fi
 }
 
+# 釘票據要連 Apple 的 CloudKit 查票據,CI 上偶爾會斷線(-1005 network connection lost,
+# stapler 回 68);公證已經通過,重試幾次就好
+staple() {
+    local i
+    for i in 1 2 3 4 5; do
+        xcrun stapler staple "$1" && return 0
+        echo "釘票據失敗(第 $i 次),$((i * 10)) 秒後重試" >&2
+        sleep $((i * 10))
+    done
+    return 1
+}
+
 step '檢查簽章'
 codesign --verify --deep --strict "$app"
 # 先存起來再比對:直接接 grep -q 的話,grep 提早結束會讓 codesign 收到 SIGPIPE,
@@ -64,7 +76,7 @@ trap 'rm -rf "$tmp"' EXIT
 step '公證 app'
 ditto -c -k --keepParent "$app" "$tmp/tterminal.zip"
 notarize "$tmp/tterminal.zip"
-xcrun stapler staple "$app"
+staple "$app"
 
 step 'zip'
 zip="$dist/tterminal-$version-macos-universal.zip"
@@ -80,7 +92,7 @@ rm -f "$dmg"
 hdiutil create -volname tterminal -srcfolder "$tmp/dmg" -ov -format UDZO "$dmg"
 codesign --force --timestamp --sign "$identity" "$dmg"
 notarize "$dmg"
-xcrun stapler staple "$dmg"
+staple "$dmg"
 
 step 'Gatekeeper 檢查'
 spctl --assess -vv --type exec "$app"
