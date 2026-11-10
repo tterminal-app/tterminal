@@ -24,7 +24,7 @@
 | Windows (x64, arm64) | [Releases](https://github.com/tterminal-app/tterminal/releases) |
 | macOS (universal: Apple silicon + Intel) | [Releases](https://github.com/tterminal-app/tterminal/releases) |
 | Linux (x64, arm64) | [Releases](https://github.com/tterminal-app/tterminal/releases): AppImage, .deb, .rpm, .tar.gz |
-| iPhone & iPad | App Store (free download, 14-day trial, one-time unlock) |
+| iPhone & iPad | [App Store](https://apps.apple.com/app/id6823060766) (free download, 14-day trial, one-time unlock) |
 | Sync server | `docker run ghcr.io/tterminal-app/tterminal-sync` ([details](https://github.com/tterminal-app/tterminal-sync)) |
 
 Desktop builds are free. The App Store version is how the project gets paid for; you're also welcome to build the iOS app yourself from this repo.
@@ -95,7 +95,7 @@ Windows、macOS、Linux、iPhone 和 iPad 都能用的 SSH 終端機。畫面用
 
 ### 下載
 
-桌面版(Windows x64 / arm64、macOS universal、Linux x64 / arm64)在 [Releases](https://github.com/tterminal-app/tterminal/releases),免費。iPhone 和 iPad 版在 App Store:免費下載、14 天試用,喜歡再一次買斷。App Store 版是這個專案的收入來源,你也可以用這個 repo 自己編 iOS 版。
+桌面版(Windows x64 / arm64、macOS universal、Linux x64 / arm64)在 [Releases](https://github.com/tterminal-app/tterminal/releases),免費。iPhone 和 iPad 版在 [App Store](https://apps.apple.com/tw/app/tterminal/id6823060766):免費下載、14 天試用,喜歡再一次買斷。App Store 版是這個專案的收入來源,你也可以用這個 repo 自己編 iOS 版。
 
 macOS 版用 Developer ID 簽章並通過 Apple 公證,下載後直接雙擊就能開。Windows 版在簽章前,SmartScreen 可能會跳出警告。
 
