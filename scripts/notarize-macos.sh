@@ -48,13 +48,13 @@ notarize() {
     fi
 }
 
-# 釘票據要連 Apple 的 CloudKit 查票據,CI 上偶爾會斷線(-1005 network connection lost,
-# stapler 回 68);公證已經通過,重試幾次就好
-staple() {
+# stapler 釘票據和驗證都要連 Apple 的 CloudKit 查票據,CI 上常常斷線
+# (-1005 network connection lost,stapler 回 68);公證已經通過,重試幾次就好
+stapler() {
     local i
     for i in 1 2 3 4 5; do
-        xcrun stapler staple "$1" && return 0
-        echo "釘票據失敗(第 $i 次),$((i * 10)) 秒後重試" >&2
+        xcrun stapler "$@" && return 0
+        echo "stapler $1 失敗(第 $i 次),$((i * 10)) 秒後重試" >&2
         sleep $((i * 10))
     done
     return 1
@@ -76,7 +76,7 @@ trap 'rm -rf "$tmp"' EXIT
 step '公證 app'
 ditto -c -k --keepParent "$app" "$tmp/tterminal.zip"
 notarize "$tmp/tterminal.zip"
-staple "$app"
+stapler staple "$app"
 
 step 'zip'
 zip="$dist/tterminal-$version-macos-universal.zip"
@@ -92,11 +92,11 @@ rm -f "$dmg"
 hdiutil create -volname tterminal -srcfolder "$tmp/dmg" -ov -format UDZO "$dmg"
 codesign --force --timestamp --sign "$identity" "$dmg"
 notarize "$dmg"
-staple "$dmg"
+stapler staple "$dmg"
 
 step 'Gatekeeper 檢查'
 spctl --assess -vv --type exec "$app"
 spctl --assess -vv --type open --context context:primary-signature "$dmg"
-xcrun stapler validate "$app"
-xcrun stapler validate "$dmg"
+stapler validate "$app"
+stapler validate "$dmg"
 printf '\n\033[32m  %s\n  %s\033[0m\n' "$zip" "$dmg"
