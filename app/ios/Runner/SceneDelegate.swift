@@ -10,6 +10,7 @@ class SceneDelegate: FlutterSceneDelegate {
     willConnectTo session: UISceneSession,
     options connectionOptions: UIScene.ConnectionOptions
   ) {
+    SceneDisplayLink.scene = scene as? UIWindowScene
     super.scene(scene, willConnectTo: session, options: connectionOptions)
     if let controller = window?.rootViewController as? FlutterViewController {
       BackgroundBridge.shared.attach(messenger: controller.binaryMessenger)
@@ -30,6 +31,13 @@ class SceneDelegate: FlutterSceneDelegate {
         let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https"
       else { return result(false) }
       UIApplication.shared.open(url) { ok in result(ok) }
+    }
+  }
+
+  override func sceneDidBecomeActive(_ scene: UIScene) {
+    super.sceneDidBecomeActive(scene)
+    if let windowScene = scene as? UIWindowScene {
+      SceneDisplayLink.reportActive(windowScene)
     }
   }
 
