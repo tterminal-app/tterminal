@@ -507,6 +507,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncServerLabel => '同步伺服器位置';
 
   @override
+  String get syncServerRepo => '自己架同步伺服器';
+
+  @override
+  String get linkCopiedNoBrowser => '無法開啟瀏覽器,已改為複製連結。';
+
+  @override
   String get setUpSync => '建立同步';
 
   @override

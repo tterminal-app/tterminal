@@ -151,6 +151,8 @@
   "syncSection": "同步(self-host server)",
   "syncNotConfigured": "尚未設定同步。可以在這台機器建立,或貼上其他裝置匯出的配對字串。",
   "syncServerLabel": "同步伺服器位置",
+  "syncServerRepo": "自己架同步伺服器",
+  "linkCopiedNoBrowser": "無法開啟瀏覽器,已改為複製連結。",
   "setUpSync": "建立同步",
   "joinWithPairing": "貼上配對字串加入",
   "syncing": "同步中…",

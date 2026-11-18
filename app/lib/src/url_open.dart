@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'selection.dart';
 import 'term_ffi.dart';
@@ -152,15 +153,26 @@ List<CellSpan> _spansOf(List<int> rowOf, List<int> colOf, int start, int end) {
   return spans;
 }
 
+/// iOS 不能 spawn 程序,改由 native 呼叫 UIApplication.open
+/// (ios/Runner/SceneDelegate.swift 的 `tterm/url`)。
+const _iosUrlChannel = MethodChannel('tterm/url');
+
 /// 用系統預設瀏覽器開啟 [url]。回傳是否成功交給系統(不代表頁面真的開起來)。
 ///
-/// scheme 在這裡再擋一次:呼叫端可能不是 [urlAt](未來的右鍵選單之類),
+/// scheme 在這裡再擋一次:呼叫端可能不是 [urlAt](設定頁的連結之類),
 /// 而放行 file://、javascript: 等於讓終端上的任意文字驅動系統。
 Future<bool> openUrl(String url) async {
   final uri = Uri.tryParse(url);
   if (uri == null || !uri.hasAuthority) return false;
   final scheme = uri.scheme.toLowerCase();
   if (scheme != 'http' && scheme != 'https') return false;
+  if (Platform.isIOS) {
+    try {
+      return await _iosUrlChannel.invokeMethod<bool>('open', url) ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
   try {
     // 一律用參數陣列(不經 shell):網址裡的 &、?、" 才不會被再解釋一次。
     final (exe, args) = switch (Platform.operatingSystem) {

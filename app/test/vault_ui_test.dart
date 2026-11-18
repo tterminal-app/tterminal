@@ -545,6 +545,12 @@ AWcsTbaugcCapPoqvicVAAAAD3R0ZXJtLXRlc3QtaG9zdAECAwQFBg==
     expect(find.byKey(const Key('sync-server')), findsOneWidget);
     expect(find.byKey(const Key('btn-enable-sync')), findsOneWidget);
     expect(find.byKey(const Key('btn-import-pairing')), findsOneWidget);
+    // 同步伺服器要自己架:連到 tterminal-sync 的 GitHub(不點,點了會開瀏覽器)
+    expect(find.byKey(const Key('link-sync-server-repo')), findsOneWidget);
+    expect(
+      find.text(kSyncServerRepoUrl.replaceFirst('https://', '')),
+      findsOneWidget,
+    );
 
     // 匯入 dialog 打開、貼壞字串 → 錯誤提示(SnackBar)且不設定同步
     await tester.tap(find.byKey(const Key('btn-import-pairing')));

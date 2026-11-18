@@ -549,6 +549,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncServerLabel => 'Sync server address';
 
   @override
+  String get syncServerRepo => 'Host your own sync server';
+
+  @override
+  String get linkCopiedNoBrowser =>
+      'Couldn\'t open a browser, so the link was copied.';
+
+  @override
   String get setUpSync => 'Set up sync';
 
   @override

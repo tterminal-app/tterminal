@@ -956,6 +956,18 @@ abstract class AppLocalizations {
   /// **'Sync server address'**
   String get syncServerLabel;
 
+  /// Link in the sync section to the tterminal-sync repository on GitHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Host your own sync server'**
+  String get syncServerRepo;
+
+  /// No description provided for @linkCopiedNoBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open a browser, so the link was copied.'**
+  String get linkCopiedNoBrowser;
+
   /// No description provided for @setUpSync.
   ///
   /// In en, this message translates to:

@@ -10,7 +10,11 @@ import 'l10n.dart';
 import 'prefs.dart';
 import 'purchases.dart';
 import 'unlock_page.dart';
+import 'url_open.dart';
 import 'vault_service.dart';
+
+/// 同步伺服器 tterminal-sync 的 repo:架設說明與 Docker 映像都在那裡。
+const kSyncServerRepoUrl = 'https://github.com/tterminal-app/tterminal-sync';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({
@@ -223,6 +227,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
         ]),
+        const SizedBox(height: 8),
+        _syncServerRepoLink(),
       ]);
     }
 
@@ -266,7 +272,28 @@ class _SettingsPageState extends State<SettingsPage> {
           label: Text(l10n.turnOffSync),
         ),
       ]),
+      const SizedBox(height: 8),
+      _syncServerRepoLink(),
     ]);
+  }
+
+  /// 同步伺服器要自己架:連到 tterminal-sync 的 GitHub。
+  Widget _syncServerRepoLink() => ListTile(
+        key: const Key('link-sync-server-repo'),
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.open_in_new),
+        title: Text(l10n.syncServerRepo),
+        subtitle: Text(kSyncServerRepoUrl.replaceFirst('https://', '')),
+        onTap: _openSyncServerRepo,
+      );
+
+  /// 開不了瀏覽器(沒有 opener 的 Linux 之類)就改成複製連結。
+  Future<void> _openSyncServerRepo() async {
+    if (await openUrl(kSyncServerRepoUrl)) return;
+    await Clipboard.setData(const ClipboardData(text: kSyncServerRepoUrl));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(l10n.linkCopiedNoBrowser)));
   }
 
   static String _fmtTime(DateTime t) =>
