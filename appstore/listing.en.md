@@ -38,8 +38,12 @@ tmux,vim,linux,shell,remote,server,devops,raspberry pi,console,command line,keys
 
 ## What's new
 
-First release.
+1.0.1:
+
+- Fixed tterminal getting stuck on the launch screen when opened on the inner screen of an unfolded iPhone Duo.
+- The Sync section in Settings now links to tterminal-sync on GitHub, so you can set up your own sync server.
+- Opening links on iPhone and iPad (for example Cmd-clicking a URL in the terminal) used to do nothing; they now open in your browser.
 
 ## Review notes
 
-App Review notes are one field for the whole app, not per language, so there's only one copy: the English note in listing.zh.md. It covers the demo SSH host the reviewer needs, starting the free trial on first launch ("Start 14-day trial", the $0 "14-day Trial" IAP), and where to find "Unlock tterminal" and Restore purchases (Settings → Trial & unlock). It also says there are no Home Screen widgets: the WidgetKit extension is only the iPhone Live Activity. The per-IAP review notes are in iap.md.
+App Review notes are one field for the whole app, not per language, so there's only one copy: the English note in listing.zh.md. No demo SSH host is provided any more; the note says neither purchase needs a connection. It covers starting the free trial on first launch ("Start 14-day trial", the $0 "14-day Trial" IAP), and where to find "Unlock tterminal" and Restore purchases (Settings → Trial & unlock). It also says there are no Home Screen widgets: the WidgetKit extension is only the iPhone Live Activity. The per-IAP review notes are in iap.md.

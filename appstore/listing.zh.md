@@ -38,7 +38,11 @@ terminal,tmux,vim,linux,遠端連線,伺服器,主機,金鑰,shell,命令列,注
 
 ## 這個版本的新內容
 
-第一版上架。
+1.0.1:
+
+- 修正在 iPhone Duo 攤開後用內螢幕開 tterminal,畫面一直停在啟動畫面的問題。
+- 設定頁的同步區塊加上「自己架同步伺服器」連結,會開到 tterminal-sync 的 GitHub 頁面。
+- 在 iPhone、iPad 上打開網址(例如在終端機裡按住 Cmd 點網址)原本沒反應,現在會用瀏覽器開啟。
 
 ## 其他欄位
 
@@ -56,14 +60,19 @@ terminal,tmux,vim,linux,遠端連線,伺服器,主機,金鑰,shell,命令列,注
 
 ## 給審查人員的備註(App Review Information)
 
-審查人員要能真的連上一台 SSH 主機才測得了。請在備註裡提供一台示範主機,例如在你的 VPS 上跑一個 `lscr.io/linuxserver/openssh-server` 容器,開一組只給審查用的帳號。內購的設定與兩個品項各自的審查備註見 [iap.md](iap.md)。審查備註是整個 App 共用一份(不分語言),英文版商店資料那邊不用另外填。
+不提供示範 SSH 主機(2026-11-18 起;1.0 審查時用過的那台已經關掉)。「登入資訊」的「需要登入」不勾,備註說明兩個內購都不必連線就能測。內購的設定與兩個品項各自的審查備註見 [iap.md](iap.md)。審查備註是整個 App 共用一份(不分語言),英文版商店資料那邊不用另外填。送審時把 build 號換成當次的。
 
-> tterminal is an SSH client. Both in-app purchases are non-consumables and appear in this build:
+> tterminal is an SSH client. Both in-app purchases are non-consumables, and both are in build 1.0.1 (3):
+>
 > 1. "14-day Trial" (dev.tterm.ttermApp.trial14, $0): on first launch the app shows "Try tterminal free for 14 days", which explains how long the trial lasts, what stops working afterwards and the unlock price. Tap "Start 14-day trial" and confirm the $0 purchase (guideline 3.1.1). If that screen was closed, the same button is in Settings (gear icon, top right) → Trial & unlock.
 > 2. "Unlock tterminal" (dev.tterm.ttermApp.unlock): once the trial has started, go to Settings (gear icon, top right) → Trial & unlock → Unlock. Restore purchases is next to it.
-> To connect, tap the server icon (top right, next to the gear) → Add Host and enter:
-> Address: <示範主機位址>  Port: <埠>  Username: <帳號>  Password: <密碼>
-> Then go back and tap the host.
+>
+> Neither purchase needs an SSH server: the trial and unlock screens, Settings, Vaults and adding hosts all work without connecting anywhere. tterminal has no accounts or servers of its own; it connects to SSH servers that users already run, so no demo server is provided. To try a connection, tap the server icon (top right, next to the gear) to open Vaults, then Add Host, and enter any SSH server you can reach.
+>
 > Everything works during the trial. If the trial ends without an unlock, hosts, keys, Vaults, Settings and sync keep working; only opening a new SSH connection shows the unlock screen.
-> The app has no Home Screen widgets, on iPhone or iPad. Its WidgetKit extension only provides a Live Activity: on iPhone, while an SSH connection is open and the app is in the background, the Lock Screen and Dynamic Island show how many connections are being kept alive. It starts by itself and there is nothing to add to the Home Screen.
+>
+> Widgets: the app has no Home Screen widgets, on iPhone or iPad, and widgets aren't one of its features. Its WidgetKit extension only provides a Live Activity: on iPhone, while an SSH connection is open and the app is in the background, the Lock Screen and Dynamic Island show how many connections are being kept alive. It starts by itself, so there is nothing to add to the Home Screen.
+>
 > Sync is optional and requires the user's own self-hosted server (open source: https://github.com/tterminal-app/tterminal-sync), so it isn't needed for review.
+>
+> About the automated VPN finding: tterminal has no VPN functionality. It doesn't use NetworkExtension or any VPN or packet-tunnel API, and it has no VPN entitlement. It is an SSH client that opens ordinary outbound TCP connections to the SSH servers the user adds. The app collects no user data (App Privacy: Data Not Collected) and shares nothing with third parties. The previous description mentioned that users could reach their own self-hosted sync server through a VPN app they already use; that sentence has been removed to avoid confusion.
